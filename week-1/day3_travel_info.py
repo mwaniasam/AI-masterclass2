@@ -1,3 +1,16 @@
+"""
+Travel Weather Tool
+-------------------
+Shows weather and country information for any city.
+
+Usage:
+    python week-1/day3_travel_info.py
+
+Requirements:
+    pip install requests python-dotenv
+    OPENWEATHER_API_KEY and RESTCOUNTRIES_API_KEY in .env file
+"""
+
 import json
 import os
 import requests
@@ -13,6 +26,13 @@ def save_to_file(data, filename):
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
     print(f"\nData saved to {filename}")
+
+
+def load_from_file(filename):
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
 
 
 def get_weather(city):
@@ -62,9 +82,16 @@ def run_tool():
         print("No city entered. Exiting.")
         return
 
-    print(f"\nFetching data for {city}...")
+    filename = f"{city.lower()}_weather.json"
+    weather_data = load_from_file(filename)
 
-    weather_data = get_weather(city)
+    if weather_data:
+        print(f"\nLoaded cached weather data from {filename}...")
+    else:
+        print(f"\nFetching live data for {city}...")
+        weather_data = get_weather(city)
+        if weather_data:
+            save_to_file(weather_data, filename)
 
     if not weather_data:
         print(f"Could not find weather data for '{city}'. Check the city name and try again.")
@@ -88,8 +115,6 @@ def run_tool():
         print(f"Region      : {region}")
         print(f"Population  : {population:,}")
         print(f"Currency    : {currencies}")
-
-    save_to_file(weather_data, f"{city.lower()}_weather.json")
 
 
 if __name__ == "__main__":
