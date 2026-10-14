@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 from dotenv import load_dotenv
@@ -6,6 +7,12 @@ load_dotenv()
 
 weather_api_key = os.getenv("OPENWEATHER_API_KEY")
 countries_api_key = os.getenv("RESTCOUNTRIES_API_KEY", "rc_live_demo")
+
+
+def save_to_file(data, filename):
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    print(f"\nData saved to {filename}")
 
 
 def get_weather(city):
@@ -24,11 +31,10 @@ def get_weather(city):
 def get_country_info(country_code):
     url = f"https://api.restcountries.com/countries/v5/codes.alpha_2/{country_code}"
     headers = {"Authorization": f"Bearer {countries_api_key}"}
-    
+
     response = requests.get(url, headers=headers, timeout=10)
     if response.status_code == 200:
         payload = response.json()
-        # v5 nests country records inside data -> objects
         objects = payload.get("data", {}).get("objects", [])
         if objects:
             return objects[0]
@@ -36,7 +42,6 @@ def get_country_info(country_code):
 
 
 def parse_currencies(raw_currencies):
-    # Handle v5 list of dicts [{"code": "KES", ...}] or legacy dict {"KES": {...}}
     if isinstance(raw_currencies, list):
         return ", ".join(c.get("code", "") for c in raw_currencies if isinstance(c, dict) and c.get("code"))
     if isinstance(raw_currencies, dict):
@@ -83,6 +88,8 @@ def run_tool():
         print(f"Region      : {region}")
         print(f"Population  : {population:,}")
         print(f"Currency    : {currencies}")
+
+    save_to_file(weather_data, f"{city.lower()}_weather.json")
 
 
 if __name__ == "__main__":
