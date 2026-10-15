@@ -1,6 +1,6 @@
-# Week 1: API Integration, Authentication & CLI Tools
+# Week 1: API Integration, Authentication, CLI Tools & Web Fetch
 
-This repository contains the command-line tools and exercises built during Week 1. It covers making HTTP requests, securing API keys with `.env`, handling HTTP and network errors gracefully, chaining multiple API calls together, and caching responses locally as JSON.
+This repository contains the command-line tools, web applications, and exercises built during Week 1. It covers making HTTP requests, securing API keys with `.env`, handling HTTP and network errors gracefully, chaining multiple API calls together, caching responses locally as JSON, and browser-based asynchronous data fetching with `fetch()` and `async/await`.
 
 ---
 
@@ -14,7 +14,9 @@ This repository contains the command-line tools and exercises built during Week 
     ├── day1_api_basics.py     # Day 1: Basic API requests & JSON parsing
     ├── day2_exercise.py       # Day 2: Authenticated ExchangeRate-API CLI
     ├── day3_travel_info.py    # Day 3: Travel Weather & Country Info Tool (with JSON cache)
-    └── day3_exercise.py       # Day 3: Book & Author Explorer CLI (Chained APIs)
+    ├── day3_exercise.py       # Day 3: Book & Author Explorer CLI (Chained APIs)
+    ├── day4_fetch.html        # Day 4: Browser-based data fetching with fetch() & async/await
+    └── day4_exercise.html     # Day 4: Live Weather Explorer Web App (loading & error states)
 ```
 
 ---
@@ -23,7 +25,7 @@ This repository contains the command-line tools and exercises built during Week 
 
 ### 1. Install Dependencies
 
-Make sure your virtual environment is active, then install the required packages:
+Make sure your virtual environment is active, then install the required Python packages:
 
 ```bash
 pip install requests python-dotenv
@@ -86,4 +88,34 @@ RESTCOUNTRIES_API_KEY=your_restcountries_v5_api_key
 - **How to Run**:
   ```bash
   python week-1/day3_exercise.py
+  ```
+
+### 5. Day 4 Lesson: Browser-Based Data Fetching (`week-1/day4_fetch.html`)
+
+- **What It Does**: Demonstrates asynchronous HTTP requests from client-side JavaScript in the browser using the Fetch API (`fetch()`) with `async/await`, dynamic DOM updates, and handling CORS-compliant REST endpoints.
+- **Key Features**:
+  - Fetches country data from an open, CORS-supported countries API.
+  - Extracts and displays flag emojis, common names, capital, region, and formatted population numbers.
+  - Traps and displays network/HTTP errors cleanly within the UI.
+- **How to Run**:
+  Open `week-1/day4_fetch.html` directly in any web browser, or run a local web server:
+  ```bash
+  python -m http.server 8000
+  # Open in browser: http://localhost:8000/week-1/day4_fetch.html
+  ```
+
+### 6. Day 4 Exercise: Live Weather Explorer Web App (`week-1/day4_exercise.html`)
+
+- **Problem It Solves**: Looking up real-time weather information via an interactive, responsive web UI with immediate feedback, robust loading indicators, and error resilience without needing an API key.
+- **Key Features**:
+  - **Chained Public APIs**: Queries Open-Meteo Geocoding to translate any entered city name into geographic coordinates, then requests live forecast metrics from the Open-Meteo Weather API.
+  - **Loading State**: Displays an animated spinner and `"Loading live weather data..."` feedback while temporarily disabling input triggers to prevent redundant requests.
+  - **Formatted Output**: Displays temperature (°C), "feels like" temperature, translated WMO weather condition icons and descriptions, humidity (%), wind speed (km/h), and precipitation (mm).
+  - **Error State**: Displays a clear, accessible warning card with specific troubleshooting messages when a location cannot be found or if a network interruption occurs.
+  - **Interactive Controls**: Supports form submission via Enter key and provides quick-pick city chips (including a bad-value test chip).
+- **How to Run**:
+  Open `week-1/day4_exercise.html` directly in any web browser, or run a local web server:
+  ```bash
+  python -m http.server 8000
+  # Open in browser: http://localhost:8000/week-1/day4_exercise.html
   ```
