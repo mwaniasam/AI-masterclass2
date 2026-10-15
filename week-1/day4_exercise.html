@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Weather Explorer | Day 4 Exercise</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+      --danger-text: #991b1b;
+      --radius: 12px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 620px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #0f172a;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .search-card {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    form {
+      display: flex;
+      gap: 12px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    button {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 110px;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .quick-picks {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .quick-picks span {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .chip {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #334155;
+      transition: background 0.15s;
+    }
+
+    .chip:hover {
+      background: #e2e8f0;
+    }
+
+    #displayArea {
+      min-height: 120px;
+    }
+
+    /* State Boxes */
+    .state-box {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 24px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3.5px solid #e2e8f0;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 14px auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    /* Error Box */
+    .error-box {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: left;
+    }
+
+    .error-title {
+      color: var(--danger-text);
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .error-message {
+      color: #7f1d1d;
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    /* Result Card */
+    .weather-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      border: 1px solid var(--border);
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    .city-name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .country-label {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-left: 6px;
+      font-weight: 400;
+    }
+
+    .updated-time {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .main-temp-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .temp-display {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .temp-value {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1;
+      color: #0f172a;
+    }
+
+    .temp-unit {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .condition-badge {
+      text-align: right;
+    }
+
+    .condition-icon {
+      font-size: 3rem;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .condition-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .feels-like {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .metric-item {
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 8px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .metric-val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    @media (max-width: 480px) {
+      form {
+        flex-direction: column;
+      }
+      button {
+        width: 100%;
+      }
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Weather Forecast Explorer</h1>
+    <p>Live meteorological data powered by Open-Meteo public API</p>
+  </header>
+
+  <section class="search-card">
+    <form id="weatherForm">
+      <input 
+        type="text" 
+        id="cityInput" 
+        placeholder="Enter a city (e.g. Nairobi, Tokyo, London)" 
+        autocomplete="off" 
+        required
+      />
+      <button type="submit" id="searchBtn">Search</button>
+    </form>
+
+    <div class="quick-picks">
+      <span>Try:</span>
+      <button type="button" class="chip" onclick="quickSearch('Nairobi')">Nairobi</button>
+      <button type="button" class="chip" onclick="quickSearch('Tokyo')">Tokyo</button>
+      <button type="button" class="chip" onclick="quickSearch('London')">London</button>
+      <button type="button" class="chip" onclick="quickSearch('New York')">New York</button>
+      <button type="button" class="chip" onclick="quickSearch('InvalidCityTest123')">Test Bad Value</button>
+    </div>
+  </section>
+
+  <main id="displayArea" role="status" aria-live="polite">
+    <div class="state-box">
+      <p style="color: var(--text-muted);">Enter a city name above or select a quick option to view live weather conditions.</p>
+    </div>
+  </main>
+</div>
+
+<script>
+  // WMO Weather Interpretation Codes (Open-Meteo)
+  const WMO_CODES = {
+    0: { desc: "Clear sky", icon: "☀️" },
+    1: { desc: "Mainly clear", icon: "🌤️" },
+    2: { desc: "Partly cloudy", icon: "⛅" },
+    3: { desc: "Overcast", icon: "☁️" },
+    45: { desc: "Foggy", icon: "🌫️" },
+    48: { desc: "Depositing rime fog", icon: "🌫️" },
+    51: { desc: "Light drizzle", icon: "🌦️" },
+    53: { desc: "Moderate drizzle", icon: "🌦️" },
+    55: { desc: "Dense drizzle", icon: "🌧️" },
+    61: { desc: "Slight rain", icon: "🌦️" },
+    63: { desc: "Moderate rain", icon: "🌧️" },
+    65: { desc: "Heavy rain", icon: "🌧️" },
+    71: { desc: "Slight snow", icon: "🌨️" },
+    73: { desc: "Moderate snow", icon: "❄️" },
+    75: { desc: "Heavy snow", icon: "❄️" },
+    80: { desc: "Rain showers", icon: "🌦️" },
+    81: { desc: "Moderate rain showers", icon: "🌧️" },
+    82: { desc: "Violent rain showers", icon: "⛈️" },
+    95: { desc: "Thunderstorm", icon: "⛈️" },
+    96: { desc: "Thunderstorm with hail", icon: "⛈️" },
+    99: { desc: "Heavy thunderstorm with hail", icon: "⛈️" }
+  };
+
+  const form = document.getElementById("weatherForm");
+  const cityInput = document.getElementById("cityInput");
+  const searchBtn = document.getElementById("searchBtn");
+  const displayArea = document.getElementById("displayArea");
+
+  // Form submission handler
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const city = cityInput.value.trim();
+    if (city) {
+      loadWeather(city);
+    }
+  });
+
+  // Quick pick handler
+  function quickSearch(cityName) {
+    cityInput.value = cityName;
+    loadWeather(cityName);
+  }
+
+  // Primary async function with fetch()
+  async function loadWeather(city) {
+    // 1. Show Loading state & disable button
+    renderLoading(city);
+    searchBtn.disabled = true;
+
+    try {
+      // Step A: Geocode city name to latitude and longitude
+      const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+      const geoResponse = await fetch(geoUrl);
+
+      if (!geoResponse.ok) {
+        throw new Error(`Location lookup failed (HTTP ${geoResponse.status}).`);
+      }
+
+      const geoData = await geoResponse.json();
+
+      // Check if location was found
+      if (!geoData.results || geoData.results.length === 0) {
+        throw new Error(`Could not find location "${city}". Please check spelling and try again.`);
+      }
+
+      const location = geoData.results[0];
+
+      // Step B: Fetch live weather forecast for the coordinates
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&timezone=auto`;
+      const weatherResponse = await fetch(weatherUrl);
+
+      if (!weatherResponse.ok) {
+        throw new Error(`Weather lookup failed (HTTP ${weatherResponse.status}).`);
+      }
+
+      const weatherData = await weatherResponse.json();
+      const current = weatherData.current;
+      const units = weatherData.current_units || {};
+
+      // 2. Display formatted success output
+      renderSuccess(location, current, units);
+
+    } catch (error) {
+      // 3. Display clear error message
+      renderError(error.message);
+    } finally {
+      // Re-enable search button
+      searchBtn.disabled = false;
+    }
+  }
+
+  function renderLoading(city) {
+    displayArea.innerHTML = `
+      <div class="state-box">
+        <div class="spinner"></div>
+        <p class="loading-text">Loading live weather data for <strong>${escapeHtml(city)}</strong>...</p>
+      </div>
+    `;
+  }
+
+  function renderError(message) {
+    displayArea.innerHTML = `
+      <div class="error-box">
+        <div class="error-title">
+          <span>⚠️</span>
+          <span>Request Failed</span>
+        </div>
+        <p class="error-message">${escapeHtml(message)}</p>
+      </div>
+    `;
+  }
+
+  function renderSuccess(location, current, units) {
+    const condition = WMO_CODES[current.weather_code] || { desc: "Unknown condition", icon: "🌡️" };
+    const temp = Math.round(current.temperature_2m);
+    const feelsLike = Math.round(current.apparent_temperature);
+    const humidity = current.relative_humidity_2m;
+    const windSpeed = current.wind_speed_10m;
+    const precipitation = current.precipitation;
+    const recordedTime = current.time ? current.time.replace("T", " ") : "Just now";
+
+    displayArea.innerHTML = `
+      <article class="weather-card">
+        <div class="card-header">
+          <div>
+            <span class="city-name">${escapeHtml(location.name)}</span>
+            <span class="country-label">${escapeHtml(location.country || "")}</span>
+          </div>
+          <span class="updated-time">Recorded: ${escapeHtml(recordedTime)}</span>
+        </div>
+
+        <div class="main-temp-section">
+          <div class="temp-display">
+            <span class="temp-value">${temp}</span>
+            <span class="temp-unit">°C</span>
+          </div>
+
+          <div class="condition-badge">
+            <div class="condition-icon">${condition.icon}</div>
+            <div class="condition-text">${condition.desc}</div>
+            <div class="feels-like">Feels like ${feelsLike}°C</div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <div class="metric-label">Humidity</div>
+            <div class="metric-val">${humidity} %</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Wind Speed</div>
+            <div class="metric-val">${windSpeed} km/h</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Precipitation</div>
+            <div class="metric-val">${precipitation} mm</div>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function escapeHtml(str) {
+    if (typeof str !== "string") return str;
+    return str.replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+</script>
+
+</body>
+</html>
