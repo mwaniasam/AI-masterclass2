@@ -119,3 +119,16 @@ RESTCOUNTRIES_API_KEY=your_restcountries_v5_api_key
   python -m http.server 8000
   # Open in browser: http://localhost:8000/week-1/day4_exercise.html
   ```
+
+---
+
+## Week 1 Capstone Project: RainGaugeKE 🌧️🇰🇪
+
+- **Project Repository**: [mwaniasam/RainGaugeKE](https://github.com/mwaniasam/RainGaugeKE)
+- **Live Demo**: [https://mwaniasam.github.io/RainGaugeKE/](https://mwaniasam.github.io/RainGaugeKE/)
+- **Problem Solved**: Helps Kenyan smallholder farmers avoid losing sown seeds to false starts by testing current season rainfall against the official ICPAC onset-of-rains rule and 20 years of historical climate data (ERA5 reanalysis).
+- **Key Features**:
+  - Unambiguous planting signal: **GO**, **GET READY**, or **WAIT**.
+  - Three interactive Chart.js charts comparing current cumulative rain, daily distribution, and 20-year onset dates.
+  - 100% keyless integration across 3 Open-Meteo endpoints (Geocoding, Historical Weather, and Forecast APIs).
+
