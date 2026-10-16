@@ -374,27 +374,27 @@
 <script>
   // WMO Weather Interpretation Codes (Open-Meteo)
   const WMO_CODES = {
-    0: { desc: "Clear sky", icon: "☀️" },
-    1: { desc: "Mainly clear", icon: "🌤️" },
-    2: { desc: "Partly cloudy", icon: "⛅" },
-    3: { desc: "Overcast", icon: "☁️" },
-    45: { desc: "Foggy", icon: "🌫️" },
-    48: { desc: "Depositing rime fog", icon: "🌫️" },
-    51: { desc: "Light drizzle", icon: "🌦️" },
-    53: { desc: "Moderate drizzle", icon: "🌦️" },
-    55: { desc: "Dense drizzle", icon: "🌧️" },
-    61: { desc: "Slight rain", icon: "🌦️" },
-    63: { desc: "Moderate rain", icon: "🌧️" },
-    65: { desc: "Heavy rain", icon: "🌧️" },
-    71: { desc: "Slight snow", icon: "🌨️" },
-    73: { desc: "Moderate snow", icon: "❄️" },
-    75: { desc: "Heavy snow", icon: "❄️" },
-    80: { desc: "Rain showers", icon: "🌦️" },
-    81: { desc: "Moderate rain showers", icon: "🌧️" },
-    82: { desc: "Violent rain showers", icon: "⛈️" },
-    95: { desc: "Thunderstorm", icon: "⛈️" },
-    96: { desc: "Thunderstorm with hail", icon: "⛈️" },
-    99: { desc: "Heavy thunderstorm with hail", icon: "⛈️" }
+    0: { desc: "Clear sky" },
+    1: { desc: "Mainly clear" },
+    2: { desc: "Partly cloudy" },
+    3: { desc: "Overcast" },
+    45: { desc: "Foggy" },
+    48: { desc: "Depositing rime fog" },
+    51: { desc: "Light drizzle" },
+    53: { desc: "Moderate drizzle" },
+    55: { desc: "Dense drizzle" },
+    61: { desc: "Slight rain" },
+    63: { desc: "Moderate rain" },
+    65: { desc: "Heavy rain" },
+    71: { desc: "Slight snow" },
+    73: { desc: "Moderate snow" },
+    75: { desc: "Heavy snow" },
+    80: { desc: "Rain showers" },
+    81: { desc: "Moderate rain showers" },
+    82: { desc: "Violent rain showers" },
+    95: { desc: "Thunderstorm" },
+    96: { desc: "Thunderstorm with hail" },
+    99: { desc: "Heavy thunderstorm with hail" }
   };
 
   const form = document.getElementById("weatherForm");
@@ -478,7 +478,6 @@
     displayArea.innerHTML = `
       <div class="error-box">
         <div class="error-title">
-          <span>⚠️</span>
           <span>Request Failed</span>
         </div>
         <p class="error-message">${escapeHtml(message)}</p>
@@ -487,7 +486,7 @@
   }
 
   function renderSuccess(location, current, units) {
-    const condition = WMO_CODES[current.weather_code] || { desc: "Unknown condition", icon: "🌡️" };
+    const condition = WMO_CODES[current.weather_code] || { desc: "Unknown condition" };
     const temp = Math.round(current.temperature_2m);
     const feelsLike = Math.round(current.apparent_temperature);
     const humidity = current.relative_humidity_2m;
@@ -512,7 +511,6 @@
           </div>
 
           <div class="condition-badge">
-            <div class="condition-icon">${condition.icon}</div>
             <div class="condition-text">${condition.desc}</div>
             <div class="feels-like">Feels like ${feelsLike}°C</div>
           </div>

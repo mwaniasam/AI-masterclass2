@@ -16,7 +16,11 @@ This repository contains the command-line tools, web applications, and exercises
     ├── day3_travel_info.py    # Day 3: Travel Weather & Country Info Tool (with JSON cache)
     ├── day3_exercise.py       # Day 3: Book & Author Explorer CLI (Chained APIs)
     ├── day4_fetch.html        # Day 4: Browser-based data fetching with fetch() & async/await
-    └── day4_exercise.html     # Day 4: Live Weather Explorer Web App (loading & error states)
+    ├── day4_exercise.html     # Day 4: Live Weather Explorer Web App (loading & error states)
+    └── project/               # Week 1 Project: RainGaugeKE (Rain Onset Analyser)
+        ├── index.html         # Web application
+        ├── README.md          # Project documentation with screenshots
+        └── screenshots/       # Application screenshots
 ```
 
 ---
@@ -95,7 +99,7 @@ RESTCOUNTRIES_API_KEY=your_restcountries_v5_api_key
 - **What It Does**: Demonstrates asynchronous HTTP requests from client-side JavaScript in the browser using the Fetch API (`fetch()`) with `async/await`, dynamic DOM updates, and handling CORS-compliant REST endpoints.
 - **Key Features**:
   - Fetches country data from an open, CORS-supported countries API.
-  - Extracts and displays flag emojis, common names, capital, region, and formatted population numbers.
+  - Extracts and displays flag codes, common names, capital, region, and formatted population numbers.
   - Traps and displays network/HTTP errors cleanly within the UI.
 - **How to Run**:
   Open `week-1/day4_fetch.html` directly in any web browser, or run a local web server:
@@ -110,7 +114,7 @@ RESTCOUNTRIES_API_KEY=your_restcountries_v5_api_key
 - **Key Features**:
   - **Chained Public APIs**: Queries Open-Meteo Geocoding to translate any entered city name into geographic coordinates, then requests live forecast metrics from the Open-Meteo Weather API.
   - **Loading State**: Displays an animated spinner and `"Loading live weather data..."` feedback while temporarily disabling input triggers to prevent redundant requests.
-  - **Formatted Output**: Displays temperature (°C), "feels like" temperature, translated WMO weather condition icons and descriptions, humidity (%), wind speed (km/h), and precipitation (mm).
+  - **Formatted Output**: Displays temperature (in degrees Celsius), "feels like" temperature, translated WMO weather condition descriptions, humidity (%), wind speed (km/h), and precipitation (mm).
   - **Error State**: Displays a clear, accessible warning card with specific troubleshooting messages when a location cannot be found or if a network interruption occurs.
   - **Interactive Controls**: Supports form submission via Enter key and provides quick-pick city chips (including a bad-value test chip).
 - **How to Run**:
@@ -122,13 +126,18 @@ RESTCOUNTRIES_API_KEY=your_restcountries_v5_api_key
 
 ---
 
-## Week 1 Capstone Project: RainGaugeKE 🌧️🇰🇪
+## Week 1 Project: RainGaugeKE (Rain Onset Analyser)
 
-- **Project Repository**: [mwaniasam/RainGaugeKE](https://github.com/mwaniasam/RainGaugeKE)
-- **Live Demo**: [https://mwaniasam.github.io/RainGaugeKE/](https://mwaniasam.github.io/RainGaugeKE/)
-- **Problem Solved**: Helps Kenyan smallholder farmers avoid losing sown seeds to false starts by testing current season rainfall against the official ICPAC onset-of-rains rule and 20 years of historical climate data (ERA5 reanalysis).
+- **Location**: [`week-1/project/`](week-1/project/)
+- **Documentation**: Detailed technical guide, onset formula, and screenshots available in [`week-1/project/README.md`](week-1/project/README.md).
+- **Problem Solved**: Helps Kenyan smallholder farmers avoid losing sown seeds to false rainfall starts by evaluating current season rainfall against the official ICPAC onset-of-rains rule and 20 years of historical climate data (ERA5 reanalysis).
 - **Key Features**:
-  - Unambiguous planting signal: **GO**, **GET READY**, or **WAIT**.
+  - Clear planting signals: **GO**, **GET READY**, or **WAIT**.
   - Three interactive Chart.js charts comparing current cumulative rain, daily distribution, and 20-year onset dates.
-  - 100% keyless integration across 3 Open-Meteo endpoints (Geocoding, Historical Weather, and Forecast APIs).
-
+  - 100% keyless integration across three Open-Meteo endpoints (Geocoding, Historical Weather, and Forecast APIs).
+- **How to Run**:
+  Open `week-1/project/index.html` directly in any web browser, or serve locally:
+  ```bash
+  python3 -m http.server 8000 --directory week-1/project
+  # Open in browser: http://localhost:8000
+  ```

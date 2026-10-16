@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<!--
+  RainGaugeKE: have the rains really started?
+
+  Problem:    Farmers in Kenya plant after the first showers, the rains stall, and the seed is lost.
+              They need to know if the season has truly started and how it compares with past years.
+  Input:      A town in Kenya and a season (short rains or long rains).
+  Processing: Open-Meteo Geocoding API finds the town's coordinates.
+              Open-Meteo Historical Weather API gives 20 past seasons of daily rainfall.
+              Open-Meteo Forecast API gives this season's rain so far plus a 16-day forecast.
+              Every season is tested against the ICPAC onset-of-rains definition.
+  Output:     A planting signal, four key numbers and three interactive charts.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RainGaugeKE: Rain Onset Analyser</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1f2933;
+      background: #f7f7f5;
+      line-height: 1.5;
+    }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; }
+    h1 { margin: 0; font-size: 2rem; }
+    h2 { margin: 0 0 4px; font-size: 1.1rem; }
+    .tagline { margin: 4px 0 24px; color: #52606d; }
+    .panel {
+      background: #fff;
+      border: 1px solid #e4e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    form { display: flex; flex-wrap: wrap; gap: 8px; }
+    input[type="text"] {
+      flex: 1 1 220px;
+      padding: 10px 12px;
+      font-size: 16px;
+      border: 1px solid #cbd2d9;
+      border-radius: 6px;
+    }
+    button { font: inherit; cursor: pointer; border-radius: 6px; }
+    .primary { padding: 10px 18px; border: none; background: #2f6f3e; color: #fff; }
+    .primary:disabled { background: #9aa5b1; cursor: wait; }
+    .seasons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip { padding: 6px 12px; border: 1px solid #cbd2d9; background: #fff; font-size: 14px; }
+    .chip[aria-pressed="true"] { background: #2f6f3e; border-color: #2f6f3e; color: #fff; }
+    .small { margin: 12px 0 0; font-size: 14px; color: #52606d; }
+    .link-button {
+      border: none;
+      background: none;
+      padding: 0 4px;
+      color: #2f6f3e;
+      text-decoration: underline;
+    }
+    #status { margin: 12px 0 0; min-height: 24px; }
+    .error { color: #b42318; }
+    .place { margin: 0; font-size: 1.5rem; }
+    .season-line { margin: 0 0 16px; color: #52606d; }
+    .verdict { margin: 0 0 16px; padding: 16px; border-radius: 8px; font-weight: 600; font-size: 1.1rem; }
+    .go { background: #e7f4ea; color: #1e5130; }
+    .watch { background: #fff6e0; color: #7a4b00; }
+    .wait { background: #fdecea; color: #8a1c12; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat { background: #fff; border: 1px solid #e4e7eb; border-radius: 8px; padding: 12px; }
+    .stat-label { font-size: 13px; color: #52606d; }
+    .stat-value { font-size: 1.4rem; font-weight: 700; }
+    .stat-note { font-size: 13px; color: #52606d; }
+    .chart-hint { margin: 0 0 8px; font-size: 14px; color: #52606d; }
+    .chart-box { position: relative; height: 300px; }
+    details { font-size: 14px; color: #3e4c59; }
+    summary { cursor: pointer; font-weight: 600; }
+    .hidden { display: none; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    @media (max-width: 600px) {
+      h1 { font-size: 1.6rem; }
+      .chart-box { height: 240px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>RainGaugeKE</h1>
+    <p class="tagline">Tests this season's rain in any Kenyan town against the ICPAC onset rule and 20 years of records, then tells you to plant or wait.</p>
+  </header>
+
+  <section class="panel">
+    <form id="search-form">
+      <label for="town-input" class="visually-hidden">Town</label>
+      <input id="town-input" type="text" maxlength="100" placeholder="Enter a town, e.g. Makindu" autocomplete="off">
+      <button id="search-button" class="primary" type="submit">Analyse</button>
+    </form>
+    <div class="seasons" role="group" aria-label="Season">
+      <button type="button" class="chip" data-season="short" aria-pressed="false">Short rains (Oct to Dec)</button>
+      <button type="button" class="chip" data-season="long" aria-pressed="false">Long rains (Mar to May)</button>
+    </div>
+    <p class="small">
+      Try:
+      <button type="button" class="link-button example" data-town="Makindu">Makindu</button>
+      <button type="button" class="link-button example" data-town="Kitui">Kitui</button>
+      <button type="button" class="link-button example" data-town="Machakos">Machakos</button>
+      <button type="button" class="link-button example" data-town="Embu">Embu</button>
+    </p>
+    <p id="status" role="status"></p>
+    <p id="alternatives" class="small hidden"></p>
+  </section>
+
+  <section id="results" class="hidden">
+    <h2 id="place-name" class="place"></h2>
+    <p id="season-line" class="season-line"></p>
+    <p id="verdict" class="verdict"></p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Rain so far</div>
+        <div id="stat-rain" class="stat-value"></div>
+        <div id="stat-rain-note" class="stat-note"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Onset this season</div>
+        <div id="stat-onset" class="stat-value"></div>
+        <div id="stat-onset-note" class="stat-note"></div>
+      </div>
+      <div class="stat">
+        <div id="stat-history-label" class="stat-label"></div>
+        <div id="stat-history" class="stat-value"></div>
+        <div id="stat-history-note" class="stat-note"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Typical onset</div>
+        <div id="stat-typical" class="stat-value"></div>
+        <div id="stat-typical-note" class="stat-note"></div>
+      </div>
+    </div>
+
+    <p id="chart-error" class="error hidden">
+      The charts could not load. Check your connection and refresh. The numbers above are still correct.
+    </p>
+
+    <div class="panel chart-panel">
+      <h2>This season against the last 20 years</h2>
+      <p class="chart-hint">Total rain since the season started. The shaded band is the middle half of past seasons.</p>
+      <div class="chart-box"><canvas id="cumulative-chart"></canvas></div>
+    </div>
+
+    <div class="panel chart-panel">
+      <h2>Daily rain this season</h2>
+      <p class="chart-hint">Dark green is recorded rain, light green is the forecast, blue marks the onset spell.</p>
+      <div class="chart-box"><canvas id="daily-chart"></canvas></div>
+    </div>
+
+    <div class="panel chart-panel">
+      <h2>When the rains started in past seasons</h2>
+      <p class="chart-hint">Shorter bars mean an earlier start. Red bars are failed seasons. Tap a year to draw it on the first chart.</p>
+      <div class="chart-box"><canvas id="onset-chart"></canvas></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <details>
+      <summary>How this works and its limits</summary>
+      <p><strong>Onset rule (ICPAC).</strong> The rains have started on the first day of a 5-day spell with at least
+        20 mm of rain and at least 3 rain days (1 mm or more), as long as no dry spell longer than 7 days follows
+        in the next 21 days.</p>
+      <p><strong>Data.</strong> Past seasons come from the ERA5 reanalysis through the Open-Meteo Historical Weather API.
+        This season and the 16-day forecast come from the Open-Meteo Forecast API.</p>
+      <p><strong>Limits.</strong> The data is gridded (cells of roughly 9 to 25 km), not a physical gauge on your farm.
+        The fixed seasons (Mar to May, Oct to Dec) fit areas with two rainy seasons, such as most of central and
+        eastern Kenya. They do not fit western Kenya and parts of the Rift Valley, which have one long season.
+        This is a decision aid, not agronomic advice.</p>
+    </details>
+  </section>
+</main>
+
+<script>
+  const SEASONS = {
+    short: { name: "Short rains", startMonth: "10" },
+    long: { name: "Long rains", startMonth: "03" }
+  };
+
+  const RAIN_DAY_MM = 1;
+  const WINDOW_DAYS = 5;
+  const WINDOW_RAIN_MM = 20;
+  const MIN_RAIN_DAYS = 3;
+  const FOLLOW_UP_DAYS = 21;
+  const MAX_DRY_SPELL_DAYS = 7;
+
+  const SEASON_DAYS = 92;
+  const DATA_DAYS = SEASON_DAYS + WINDOW_DAYS - 1 + FOLLOW_UP_DAYS;
+  const HISTORY_YEARS = 20;
+  const MIN_HISTORY_YEARS = 10;
+  const MAX_MISSING_DAYS = 9;
+  const FORECAST_DAYS = 16;
+  const MAX_PAST_DAYS = 92;
+  const ARCHIVE_LAG_DAYS = 7;
+  const REQUEST_TIMEOUT_MS = 20000;
+
+  const GEOCODE_URL = "https://geocoding-api.open-meteo.com/v1/search";
+  const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+  const ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive";
+
+  const COLORS = {
+    season: "#2f6f3e",
+    forecast: "#8cc49b",
+    average: "#52606d",
+    band: "rgba(82, 96, 109, 0.15)",
+    onset: "#1d4ed8",
+    history: "#9aa5b1",
+    failed: "#b42318",
+    compare: "#d97706"
+  };
+
+  const form = document.getElementById("search-form");
+  const townInput = document.getElementById("town-input");
+  const searchButton = document.getElementById("search-button");
+  const statusText = document.getElementById("status");
+  const alternatives = document.getElementById("alternatives");
+  const results = document.getElementById("results");
+  const seasonButtons = document.querySelectorAll("[data-season]");
+
+  let requestCount = 0;
+  let selectedSeason = defaultSeason(todayInNairobi());
+  let lastPlace = null;
+  let pastSeasons = [];
+  let compareYear = null;
+  const charts = {};
+
+  // ---------- Dates ----------
+
+  function todayInNairobi() {
+    return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi" }).format(new Date());
+  }
+
+  function addDays(isoDate, days) {
+    const date = new Date(isoDate + "T00:00:00Z");
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  function daysBetween(fromDate, toDate) {
+    return Math.round((Date.parse(toDate) - Date.parse(fromDate)) / 86400000);
+  }
+
+  function formatDate(isoDate) {
+    return new Date(isoDate + "T00:00:00Z").toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      timeZone: "UTC"
+    });
+  }
+
+  function defaultSeason(today) {
+    const month = Number(today.slice(5, 7));
+    return month >= 3 && month <= 9 ? "long" : "short";
+  }
+
+  function seasonStart(seasonKey, year) {
+    return `${year}-${SEASONS[seasonKey].startMonth}-01`;
+  }
+
+  function latestSeasonStart(seasonKey, today) {
+    const year = Number(today.slice(0, 4));
+    const start = seasonStart(seasonKey, year);
+    return start <= today ? start : seasonStart(seasonKey, year - 1);
+  }
+
+  // ---------- Numbers ----------
+
+  function sum(values) {
+    return values.reduce((total, value) => total + value, 0);
+  }
+
+  function mean(values) {
+    return values.length ? sum(values) / values.length : 0;
+  }
+
+  function percentile(values, p) {
+    const sorted = [...values].sort((a, b) => a - b);
+    const position = (sorted.length - 1) * p;
+    const lower = Math.floor(position);
+    const upper = Math.ceil(position);
+    return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+  }
+
+  function runningTotal(days) {
+    let total = 0;
+    return days.map(day => (total += day.rain ?? 0));
+  }
+
+  // ---------- Onset rule ----------
+
+  function longestDrySpell(days) {
+    let longest = 0;
+    let current = 0;
+    for (const day of days) {
+      current = (day.rain ?? 0) < RAIN_DAY_MM ? current + 1 : 0;
+      longest = Math.max(longest, current);
+    }
+    return longest;
+  }
+
+  function findOnset(days) {
+    for (let i = 0; i < SEASON_DAYS; i++) {
+      const spell = days.slice(i, i + WINDOW_DAYS);
+      if (spell.length < WINDOW_DAYS) break;
+
+      const spellRain = sum(spell.map(day => day.rain ?? 0));
+      const rainDays = spell.filter(day => (day.rain ?? 0) >= RAIN_DAY_MM).length;
+      if (spellRain < WINDOW_RAIN_MM || rainDays < MIN_RAIN_DAYS) continue;
+
+      const followUp = days.slice(i + WINDOW_DAYS, i + WINDOW_DAYS + FOLLOW_UP_DAYS);
+      if (longestDrySpell(followUp) > MAX_DRY_SPELL_DAYS) continue;
+
+      const usesForecast = spell.concat(followUp).some(day => day.forecast);
+      const fullFollowUp = followUp.length === FOLLOW_UP_DAYS;
+      return { index: i, confirmed: fullFollowUp && !usesForecast };
+    }
+    return null;
+  }
+
+  // ---------- API calls ----------
+
+  async function fetchJSON(url) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    let response;
+    try {
+      response = await fetch(url, { signal: controller.signal });
+    } catch (error) {
+      if (error.name === "AbortError") {
+        throw new Error("The weather service took too long to respond. Try again.");
+      }
+      throw new Error("Could not connect. Check your internet connection and try again.");
+    } finally {
+      clearTimeout(timer);
+    }
+
+    if (response.status === 429) {
+      throw new Error("Too many requests to the weather service. Wait a minute and try again.");
+    }
+    const data = await response.json().catch(() => null);
+    if (!response.ok || data === null || data.error) {
+      const reason = data && data.reason ? data.reason : `status ${response.status}`;
+      throw new Error(`The weather service returned an error (${reason}).`);
+    }
+    return data;
+  }
+
+  function rainByDate(daily) {
+    if (!daily || !Array.isArray(daily.time) || !Array.isArray(daily.precipitation_sum)) {
+      throw new Error("The weather service sent data in an unexpected format. Try again later.");
+    }
+    return new Map(daily.time.map((date, i) => [date, daily.precipitation_sum[i]]));
+  }
+
+  function seasonDays(rainMap, start, today) {
+    const days = [];
+    for (let i = 0; i < DATA_DAYS; i++) {
+      const date = addDays(start, i);
+      if (!rainMap.has(date)) break;
+      days.push({ date, rain: rainMap.get(date), forecast: date >= today });
+    }
+    return days;
+  }
+
+  async function findPlaces(name) {
+    const url = `${GEOCODE_URL}?name=${encodeURIComponent(name)}&count=5&language=en&countryCode=KE`;
+    const data = await fetchJSON(url);
+    if (!data.results || data.results.length === 0) {
+      throw new Error(`"${name}" was not found in Kenya. Check the spelling or try a nearby larger town.`);
+    }
+    return data.results;
+  }
+
+  async function loadCurrentSeason(place, start, today) {
+    const elapsed = daysBetween(start, today);
+    const location = `latitude=${place.latitude}&longitude=${place.longitude}`;
+    let url;
+
+    if (elapsed <= MAX_PAST_DAYS) {
+      url = `${FORECAST_URL}?${location}&daily=precipitation_sum` +
+        `&past_days=${elapsed}&forecast_days=${FORECAST_DAYS}&timezone=Africa%2FNairobi`;
+    } else {
+      const wantedEnd = addDays(start, DATA_DAYS - 1);
+      const latestAvailable = addDays(today, -ARCHIVE_LAG_DAYS);
+      const end = wantedEnd < latestAvailable ? wantedEnd : latestAvailable;
+      url = `${ARCHIVE_URL}?${location}&start_date=${start}&end_date=${end}` +
+        "&daily=precipitation_sum&timezone=Africa%2FNairobi";
+    }
+
+    const data = await fetchJSON(url);
+    const days = seasonDays(rainByDate(data.daily), start, today);
+    if (days.length === 0) {
+      throw new Error("No rainfall data is available for this season yet. Try again tomorrow.");
+    }
+    const observedDays = Math.min(SEASON_DAYS, days.filter(day => !day.forecast).length);
+    return { start, days, observedDays, complete: observedDays === SEASON_DAYS };
+  }
+
+  async function loadPastSeasons(place, seasonKey, currentStart) {
+    const lastYear = Number(currentStart.slice(0, 4)) - 1;
+    const firstYear = lastYear - HISTORY_YEARS + 1;
+    const start = seasonStart(seasonKey, firstYear);
+    const end = addDays(seasonStart(seasonKey, lastYear), DATA_DAYS - 1);
+    const url = `${ARCHIVE_URL}?latitude=${place.latitude}&longitude=${place.longitude}` +
+      `&start_date=${start}&end_date=${end}&daily=precipitation_sum&timezone=Africa%2FNairobi`;
+
+    const rainMap = rainByDate((await fetchJSON(url)).daily);
+    const seasons = [];
+    let skipped = 0;
+
+    for (let year = firstYear; year <= lastYear; year++) {
+      const yearStart = seasonStart(seasonKey, year);
+      const days = seasonDays(rainMap, yearStart, "9999-12-31");
+      const missing = days.slice(0, SEASON_DAYS).filter(day => day.rain === null).length;
+      if (days.length < DATA_DAYS || missing > MAX_MISSING_DAYS) {
+        skipped++;
+        continue;
+      }
+      const inSeason = days.slice(0, SEASON_DAYS);
+      const cumulative = runningTotal(inSeason);
+      seasons.push({
+        year,
+        start: yearStart,
+        cumulative,
+        total: cumulative[SEASON_DAYS - 1],
+        onset: findOnset(days)
+      });
+    }
+    return { seasons, skipped };
+  }
+
+  // ---------- Analysis ----------
+
+  function analyse(current, seasons) {
+    const inSeason = current.days.slice(0, SEASON_DAYS);
+    const observed = current.observedDays;
+    const rainSoFar = sum(inSeason.slice(0, observed).map(day => day.rain ?? 0));
+    const normalSoFar = observed > 0 ? mean(seasons.map(s => s.cumulative[observed - 1])) : 0;
+    const onsetIndexes = seasons.filter(s => s.onset).map(s => s.onset.index);
+
+    return {
+      rainSoFar,
+      normalSoFar,
+      onset: findOnset(current.days),
+      startedByNow: seasons.filter(s => s.onset && s.onset.index < observed).length,
+      withOnset: onsetIndexes.length,
+      failed: seasons.length - onsetIndexes.length,
+      typicalOnset: onsetIndexes.length ? Math.round(percentile(onsetIndexes, 0.5)) : null
+    };
+  }
+
+  function verdictFor(result, current, total) {
+    const onsetDate = result.onset ? formatDate(addDays(current.start, result.onset.index)) : null;
+
+    if (result.onset && result.onset.confirmed) {
+      return current.complete
+        ? { tone: "go", text: `The rains started on ${onsetDate} and held.` }
+        : { tone: "go", text: `Planting signal: GO. The rains started on ${onsetDate} and have held.` };
+    }
+    if (result.onset) {
+      return {
+        tone: "watch",
+        text: `Planting signal: GET READY. The onset rule is met from ${onsetDate}, but this depends on ` +
+          "the forecast or the latest days. Confirm before you plant."
+      };
+    }
+    if (current.complete) {
+      return { tone: "wait", text: "Failed season. The rains never met the onset rule." };
+    }
+    if (result.startedByNow / total >= 0.5) {
+      return {
+        tone: "wait",
+        text: `Planting signal: WAIT. The rains are late. By this date they had started in ` +
+          `${result.startedByNow} of the last ${total} seasons.`
+      };
+    }
+    if (result.typicalOnset === null) {
+      return { tone: "wait", text: "Planting signal: WAIT. The rains have not started, and most past seasons failed here." };
+    }
+    return {
+      tone: "wait",
+      text: `Planting signal: WAIT. It is still early. The rains usually start around ` +
+        `${formatDate(addDays(current.start, result.typicalOnset))}.`
+    };
+  }
+
+  // ---------- Rendering ----------
+
+  function setText(id, text) {
+    document.getElementById(id).textContent = text;
+  }
+
+  function render(place, current, past) {
+    const seasons = past.seasons;
+    const result = analyse(current, seasons);
+    const total = seasons.length;
+    const seasonYear = current.start.slice(0, 4);
+    const lastObserved = current.observedDays > 0 ? addDays(current.start, current.observedDays - 1) : null;
+
+    setText("place-name", `${place.name}, ${place.admin1 ?? "Kenya"}`);
+    setText("season-line",
+      `${SEASONS[selectedSeason].name} ${seasonYear}, compared with ${seasons[0].year} to ${seasons[total - 1].year}` +
+      (past.skipped ? ` (${past.skipped} years skipped for missing data)` : "") + ".");
+
+    const verdict = verdictFor(result, current, total);
+    const verdictBox = document.getElementById("verdict");
+    verdictBox.textContent = verdict.text;
+    verdictBox.className = `verdict ${verdict.tone}`;
+
+    setText("stat-rain", `${Math.round(result.rainSoFar)} mm`);
+    if (!lastObserved) {
+      setText("stat-rain-note", "The season starts today.");
+    } else if (result.normalSoFar > 0) {
+      const percent = Math.round((result.rainSoFar / result.normalSoFar) * 100);
+      setText("stat-rain-note", `${percent}% of normal up to ${formatDate(lastObserved)}`);
+    } else {
+      setText("stat-rain-note", `Normal up to ${formatDate(lastObserved)} is 0 mm`);
+    }
+
+    if (result.onset) {
+      setText("stat-onset", formatDate(addDays(current.start, result.onset.index)));
+      setText("stat-onset-note", result.onset.confirmed ? "Confirmed" : "Provisional, needs more days");
+    } else {
+      setText("stat-onset", current.complete ? "None" : "Not yet");
+      setText("stat-onset-note", current.complete ? "Rule never met" : "Rule not met so far");
+    }
+
+    if (current.complete) {
+      setText("stat-history-label", "Past seasons with an onset");
+      setText("stat-history", `${result.withOnset} of ${total}`);
+      setText("stat-history-note", "Seasons where the rains started");
+    } else {
+      setText("stat-history-label", "Started by this date");
+      setText("stat-history", `${result.startedByNow} of ${total}`);
+      setText("stat-history-note", "Past seasons");
+    }
+
+    setText("stat-typical", result.typicalOnset === null
+      ? "None"
+      : formatDate(addDays(current.start, result.typicalOnset)));
+    setText("stat-typical-note", `${result.failed} of ${total} past seasons failed`);
+
+    results.classList.remove("hidden");
+    renderCharts(current, seasons, result);
+  }
+
+  function chartOptions(yTitle) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      scales: {
+        x: { ticks: { maxTicksLimit: 8, maxRotation: 0 } },
+        y: { beginAtZero: true, title: { display: true, text: yTitle } }
+      },
+      plugins: {
+        legend: { labels: { boxWidth: 12, filter: item => !item.text.startsWith("_") } },
+        tooltip: {
+          filter: item => !item.dataset.label.startsWith("_") && Number.isFinite(item.parsed.y),
+          callbacks: { label: item => `${item.dataset.label}: ${item.parsed.y.toFixed(1)} mm` }
+        }
+      }
+    };
+  }
+
+  function onsetColors() {
+    return pastSeasons.map(s =>
+      s.year === compareYear ? COLORS.compare : s.onset ? COLORS.history : COLORS.failed);
+  }
+
+  function renderCharts(current, seasons, result) {
+    Object.values(charts).forEach(chart => chart.destroy());
+    pastSeasons = seasons;
+    compareYear = null;
+
+    const chartError = document.getElementById("chart-error");
+    const chartPanels = document.querySelectorAll(".chart-panel");
+    if (typeof Chart === "undefined") {
+      chartError.classList.remove("hidden");
+      chartPanels.forEach(panel => panel.classList.add("hidden"));
+      return;
+    }
+    chartError.classList.add("hidden");
+    chartPanels.forEach(panel => panel.classList.remove("hidden"));
+
+    const labels = Array.from({ length: SEASON_DAYS }, (_, i) => formatDate(addDays(current.start, i)));
+    const inSeason = current.days.slice(0, SEASON_DAYS);
+    const observed = current.observedDays;
+    const hasForecast = inSeason.some(day => day.forecast);
+
+    // Chart 1: cumulative rain against past seasons
+    const thisSeason = runningTotal(inSeason);
+    const atDay = i => seasons.map(s => s.cumulative[i]);
+    const datasets = [
+      { label: "_low", data: labels.map((_, i) => percentile(atDay(i), 0.25)),
+        borderWidth: 0, pointRadius: 0 },
+      { label: "Normal range", data: labels.map((_, i) => percentile(atDay(i), 0.75)),
+        borderWidth: 0, pointRadius: 0, backgroundColor: COLORS.band, fill: "-1" },
+      { label: "20-year average", data: labels.map((_, i) => mean(atDay(i))),
+        borderColor: COLORS.average, backgroundColor: COLORS.average, borderWidth: 2, pointRadius: 0 },
+      { label: "This season", data: labels.map((_, i) => (i < observed ? thisSeason[i] : null)),
+        borderColor: COLORS.season, backgroundColor: COLORS.season, borderWidth: 3, pointRadius: 0 }
+    ];
+    if (hasForecast) {
+      datasets.push({
+        label: "Forecast",
+        data: labels.map((_, i) => (i >= observed - 1 && i < inSeason.length ? thisSeason[i] : null)),
+        borderColor: COLORS.season, backgroundColor: COLORS.season,
+        borderDash: [6, 4], borderWidth: 3, pointRadius: 0
+      });
+    }
+
+    const cumulativeOptions = chartOptions("Total rain (mm)");
+    cumulativeOptions.plugins.tooltip.callbacks.label = item => {
+      if (item.dataset.label === "Normal range") {
+        const low = item.chart.data.datasets[0].data[item.dataIndex];
+        return `Normal range: ${low.toFixed(0)} to ${item.parsed.y.toFixed(0)} mm`;
+      }
+      return `${item.dataset.label}: ${item.parsed.y.toFixed(1)} mm`;
+    };
+    charts.cumulative = new Chart(document.getElementById("cumulative-chart"), {
+      type: "line",
+      data: { labels, datasets },
+      options: cumulativeOptions
+    });
+
+    // Chart 2: daily rain with the onset spell highlighted
+    const inOnset = i => result.onset && i >= result.onset.index && i < result.onset.index + WINDOW_DAYS;
+    const pick = test => labels.map((_, i) => {
+      const day = inSeason[i];
+      return day && test(day, i) ? day.rain ?? 0 : null;
+    });
+    const dailySets = [
+      { label: "Recorded", data: pick((day, i) => !day.forecast && !inOnset(i)),
+        backgroundColor: COLORS.season, grouped: false }
+    ];
+    if (hasForecast) {
+      dailySets.push({ label: "Forecast", data: pick((day, i) => day.forecast && !inOnset(i)),
+        backgroundColor: COLORS.forecast, grouped: false });
+    }
+    if (result.onset) {
+      dailySets.push({ label: "Onset spell", data: pick((day, i) => inOnset(i)),
+        backgroundColor: COLORS.onset, grouped: false });
+    }
+    charts.daily = new Chart(document.getElementById("daily-chart"), {
+      type: "bar",
+      data: { labels, datasets: dailySets },
+      options: chartOptions("Rain per day (mm)")
+    });
+
+    // Chart 3: onset day in each past season
+    const onsetOptions = chartOptions("Days after season start");
+    onsetOptions.scales.y.max = SEASON_DAYS;
+    onsetOptions.plugins.legend = { display: false };
+    onsetOptions.plugins.tooltip.callbacks = {
+      label: item => {
+        const season = seasons[item.dataIndex];
+        return season.onset
+          ? `Rains started ${formatDate(addDays(season.start, season.onset.index))}`
+          : "No onset (failed season)";
+      },
+      afterLabel: item => `Season total: ${Math.round(seasons[item.dataIndex].total)} mm`
+    };
+    onsetOptions.onClick = (event, elements) => {
+      if (elements.length) toggleCompare(seasons[elements[0].index]);
+    };
+    onsetOptions.onHover = (event, elements) => {
+      event.native.target.style.cursor = elements.length ? "pointer" : "default";
+    };
+    charts.onset = new Chart(document.getElementById("onset-chart"), {
+      type: "bar",
+      data: {
+        labels: seasons.map(s => String(s.year)),
+        datasets: [{
+          label: "Onset",
+          data: seasons.map(s => (s.onset ? s.onset.index + 1 : SEASON_DAYS)),
+          backgroundColor: onsetColors()
+        }]
+      },
+      options: onsetOptions
+    });
+  }
+
+  function toggleCompare(season) {
+    const lines = charts.cumulative.data.datasets;
+    const existing = lines.findIndex(line => line.isCompare);
+    if (existing !== -1) lines.splice(existing, 1);
+
+    compareYear = compareYear === season.year ? null : season.year;
+    if (compareYear !== null) {
+      lines.push({
+        label: `${season.year} season`,
+        data: season.cumulative,
+        borderColor: COLORS.compare,
+        backgroundColor: COLORS.compare,
+        borderWidth: 2,
+        pointRadius: 0,
+        isCompare: true
+      });
+    }
+    charts.cumulative.update();
+    charts.onset.data.datasets[0].backgroundColor = onsetColors();
+    charts.onset.update();
+  }
+
+  // ---------- Page state ----------
+
+  function setStatus(message, isError = false) {
+    statusText.textContent = message;
+    statusText.className = isError ? "error" : "";
+  }
+
+  function setLoading(isLoading) {
+    searchButton.disabled = isLoading;
+    searchButton.textContent = isLoading ? "Working..." : "Analyse";
+  }
+
+  function showAlternatives(places) {
+    alternatives.replaceChildren();
+    if (places.length === 0) {
+      alternatives.classList.add("hidden");
+      return;
+    }
+    alternatives.append("Not the right place? ");
+    places.forEach(place => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "link-button";
+      button.textContent = `${place.name} (${place.admin1 ?? "Kenya"})`;
+      button.addEventListener("click", () => analysePlace(place));
+      alternatives.append(button);
+    });
+    alternatives.classList.remove("hidden");
+  }
+
+  function updateSeasonButtons() {
+    seasonButtons.forEach(button => {
+      button.setAttribute("aria-pressed", String(button.dataset.season === selectedSeason));
+    });
+  }
+
+  function saveToUrl(townName) {
+    try {
+      const params = new URLSearchParams({ town: townName, season: selectedSeason });
+      history.replaceState(null, "", `?${params}`);
+    } catch (error) {
+      // Some browsers block this on local files; the app works without it.
+    }
+  }
+
+  async function analysePlace(place) {
+    const runId = ++requestCount;
+    lastPlace = place;
+    setLoading(true);
+    setStatus(`Loading 20 years of rainfall for ${place.name}...`);
+    results.classList.add("hidden");
+
+    try {
+      const today = todayInNairobi();
+      const start = latestSeasonStart(selectedSeason, today);
+      const [current, past] = await Promise.all([
+        loadCurrentSeason(place, start, today),
+        loadPastSeasons(place, selectedSeason, start)
+      ]);
+      if (runId !== requestCount) return;
+      if (past.seasons.length < MIN_HISTORY_YEARS) {
+        throw new Error("There is not enough past rainfall data for this place to make a fair comparison.");
+      }
+      render(place, current, past);
+      setStatus("");
+      saveToUrl(place.name);
+    } catch (error) {
+      if (runId !== requestCount) return;
+      setStatus(error.message, true);
+    } finally {
+      if (runId === requestCount) setLoading(false);
+    }
+  }
+
+  async function searchTown(name) {
+    if (name.length < 2) {
+      setStatus("Enter at least 2 letters of a town name.", true);
+      return;
+    }
+    const runId = ++requestCount;
+    setLoading(true);
+    setStatus(`Finding ${name}...`);
+    showAlternatives([]);
+
+    try {
+      const places = await findPlaces(name);
+      if (runId !== requestCount) return;
+      showAlternatives(places.slice(1));
+      await analysePlace(places[0]);
+    } catch (error) {
+      if (runId !== requestCount) return;
+      results.classList.add("hidden");
+      setStatus(error.message, true);
+      setLoading(false);
+    }
+  }
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    searchTown(townInput.value.trim());
+  });
+
+  seasonButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      selectedSeason = button.dataset.season;
+      updateSeasonButtons();
+      if (lastPlace) analysePlace(lastPlace);
+    });
+  });
+
+  document.querySelectorAll(".example").forEach(button => {
+    button.addEventListener("click", () => {
+      townInput.value = button.dataset.town;
+      searchTown(button.dataset.town);
+    });
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  if (SEASONS[params.get("season")]) selectedSeason = params.get("season");
+  updateSeasonButtons();
+  if (params.get("town")) {
+    townInput.value = params.get("town");
+    searchTown(params.get("town").trim());
+  }
+</script>
+</body>
+</html>
