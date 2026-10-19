@@ -10,17 +10,19 @@ This repository contains the command-line tools, web applications, and exercises
 ├── .env                       # Local environment variables (ignored by git)
 ├── .gitignore                 # Ignores .env, __pycache__, and cached JSON files
 ├── README.md                  # Week 1 documentation
-└── week-1/
-    ├── day1_api_basics.py     # Day 1: Basic API requests & JSON parsing
-    ├── day2_exercise.py       # Day 2: Authenticated ExchangeRate-API CLI
-    ├── day3_travel_info.py    # Day 3: Travel Weather & Country Info Tool (with JSON cache)
-    ├── day3_exercise.py       # Day 3: Book & Author Explorer CLI (Chained APIs)
-    ├── day4_fetch.html        # Day 4: Browser-based data fetching with fetch() & async/await
-    ├── day4_exercise.html     # Day 4: Live Weather Explorer Web App (loading & error states)
-    └── project/               # Week 1 Project: RainGaugeKE (Rain Onset Analyser)
-        ├── index.html         # Web application
-        ├── README.md          # Project documentation with screenshots
-        └── screenshots/       # Application screenshots
+├── week-1/
+│   ├── day1_api_basics.py     # Day 1: Basic API requests & JSON parsing
+│   ├── day2_exercise.py       # Day 2: Authenticated ExchangeRate-API CLI
+│   ├── day3_travel_info.py    # Day 3: Travel Weather & Country Info Tool (with JSON cache)
+│   ├── day3_exercise.py       # Day 3: Book & Author Explorer CLI (Chained APIs)
+│   ├── day4_fetch.html        # Day 4: Browser-based data fetching with fetch() & async/await
+│   ├── day4_exercise.html     # Day 4: Live Weather Explorer Web App (loading & error states)
+│   └── project/               # Week 1 Project: RainGaugeKE (Rain Onset Analyser)
+│       ├── index.html         # Web application
+│       ├── README.md          # Project documentation with screenshots
+│       └── screenshots/       # Application screenshots
+└── week_2/
+    └── day1_brief_analysis.md # Day 1: Freelance brief analysis and proposal prep
 ```
 
 ---

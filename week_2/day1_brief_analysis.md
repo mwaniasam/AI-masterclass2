@@ -1,14 +1,14 @@
 # Brief Analysis: AI Vibe Coder
 
 ## Job Overview
-- Platform: Freelance Job Board (e.g., Upwork)
+- Platform: Upwork
 - Title: AI Vibe Coder
 - Location: Worldwide (Remote)
 - Engagement: Project-based, with potential for long-term collaboration
 
 ---
 
-## 1. The Problem (In My Own Words)
+## 1. The Problem
 The client has a vague, unvalidated concept for a tool that generates a continuous stream of ideas, but they lack the technical capability and product specifications to build it. They need a self-directed developer who can translate their high-level vision into a functioning product without requiring step-by-step guidance.
 
 ## 2. The Deliverable
