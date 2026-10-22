@@ -1,6 +1,7 @@
 # Phase II - Week 2 - Day 8: Delivering Work Professionally
 
 Track B: Data Analyst  
+Client: Samuel Kyalo  
 Project Selected: SMP Command Centre Dashboard (`week_5/week5_project` in `ai-foundations`)  
 Release Tag: `v1.0`  
 
@@ -48,7 +49,7 @@ The project README at `week_5/week5_project/README.md` was rewritten to producti
 
 Subject: Delivery: SMP Command Centre Dashboard (v1.0)
 
-Hello [Client Name],
+Hello Samuel Kyalo,
 
 The SMP Command Centre Dashboard is ready for handover. Here is a summary of what was delivered:
 
