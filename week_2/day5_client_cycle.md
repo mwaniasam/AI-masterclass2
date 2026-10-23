@@ -128,28 +128,3 @@ Please let me know if you have any questions.
 > Everything in our original agreement is working as delivered. Let us complete the sign-off and balance payment for this calculator milestone first. Once that is wrapped up, I can scope and quote the monthly ledger add-on for KES 4,500 with a 2-day delivery. Ready for sign-off on the current tool when you are."
 
 ---
-
-## Technical Addendum: Track B Day 10 Live Exchange Rate Tracker
-
-In addition to the simulated client cycle, Track B requires building an automated script that queries a live financial API.
-
-- **Source Code**: [`week_2/exchange_rate_tracker.py`](file:///home/mwaniasamuel/AI-masterclass2/week_2/exchange_rate_tracker.py)
-- **API Endpoint**: `https://open.er-api.com/v6/latest/USD`
-- **Error Handling**: Wrapped in `try...except` catching `urllib.error.URLError`, `json.JSONDecodeError`, and general exceptions.
-
-### Live Output
-```
-==================================================
-         LIVE EXCHANGE RATE TRACKER (USD/KES)
-==================================================
-API Source       : open.er-api.com
-Last Updated UTC : Fri, 23 Oct 2026 00:02:31 +0000
-Current Rate     : 1 USD = KES 129.87
---------------------------------------------------
-CONVERSIONS (KES to USD)
---------------------------------------------------
-  KES  10,000  ->  $   77.00 USD
-  KES  50,000  ->  $  385.01 USD
-  KES 100,000  ->  $  770.02 USD
-==================================================
-```
