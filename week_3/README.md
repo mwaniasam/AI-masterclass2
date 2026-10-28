@@ -1,83 +1,38 @@
-# Nakuru Dairy Co-op - Advanced Zone Milk & Payout Analytics
+# Phase II - Track B: Data Analyst - Week 3: Advanced Data Analysis
 
-An automated data transformation and analytics pipeline that merges daily milk collection records with farmer master files, calculates gross volume and financial payouts by geographic zone, identifies top producers, and generates an executive summary table.
-
----
-
-## Business Context
-
-A dairy cooperative manager in Nakuru County receives two separate operational spreadsheets:
-1. **Daily Milk Collections**: Logged at the weighbridge each morning per farmer.
-2. **Farmer Master Registry**: Zone assignments and agreed buying rates per litre.
-
-This analytics tool merges these two disparate sources, computes monthly zone aggregations, identifies the highest milk supplier in each zone, and formats the output for immediate management review and board reporting.
+A collection of commercial data engineering, aggregation, and time series analytics projects developed during Week 3 of the AI Masterclass (Track B: Data Analyst).
 
 ---
 
-## Required Input Files
+## Repository Contents
 
-The script expects two CSV files in the project directory:
-
-### 1. `daily_collection.csv`
-Contains the granular, daily milk drop-off records.
-- `farmer_name` (string): Full name of the farmer.
-- `date` (string/date): Date of delivery (e.g. `YYYY-MM-DD`).
-- `litres` (float): Milk volume delivered in litres.
-
-Example:
-```csv
-farmer_name,date,litres
-John Kamau,2026-10-01,34.1
-Mary Wanjiku,2026-10-01,52.3
-Peter Njoroge,2026-10-01,20.9
 ```
-
-### 2. `farmer_details.csv`
-Contains member registration metadata and commercial agreements.
-- `farmer_name` (string): Full name of the farmer (merge key).
-- `zone` (string): Cooperative collection area (`Bahati`, `Njoro`, `Rongai`).
-- `rate_per_litre` (float): Payout rate in KES per litre.
-
-Example:
-```csv
-farmer_name,zone,rate_per_litre
-John Kamau,Njoro,55.0
-David Mwangi,Bahati,58.0
-Samuel Korir,Rongai,54.0
+week_3/
+|-- daily_collection.csv                  # Day 11: Granular daily milk collection records
+|-- farmer_details.csv                    # Day 11: Farmer master profiles, zones, and rates
+|-- dairy_zone_analysis.py                # Day 11: Multi-file merge, aggregation, and reporting script
+|-- zone_monthly_summary.csv              # Day 11: Exported monthly executive summary table
+|-- day1_advanced_pandas.md               # Day 11: Detailed notes on merges, joins, and pivots
+|-- nairobi_supermarket_transactions.csv  # Day 12: 18 months of daily customer checkout counts
+|-- supermarket_traffic_analysis.py       # Day 12: Time series pipeline and visualization script
+|-- supermarket_traffic_trend.png         # Day 12: Dual-axis trend chart for operations manager
+|-- day2_time_series.md                   # Day 12: Detailed notes on rolling averages and resampling
+\-- README.md                             # Module documentation and executive summaries
 ```
 
 ---
 
-## Technical Stack & Requirements
+## Project 1: Nakuru Dairy Co-op Zone Analytics (Day 11)
 
-- Python 3.8+
-- `pandas` (>= 2.0.0)
+### Business Context
+Merges daily milk collection records with farmer master files to compute gross volumes, financial payouts, and top producers across three Nakuru County agricultural zones (Bahati, Njoro, and Rongai).
 
-To install pandas if not already present:
+### How to Run
 ```bash
-pip install pandas
+python3 dairy_zone_analysis.py
 ```
 
----
-
-## How to Run
-
-1. Open your terminal and navigate to the `week_3` directory:
-   ```bash
-   cd week_3
-   ```
-
-2. Run the analysis script:
-   ```bash
-   python3 dairy_zone_analysis.py
-   ```
-
-3. The script will render the formatted executive report to the console and export the summary to `zone_monthly_summary.csv`.
-
----
-
-## Sample Execution Output
-
+### Sample Output
 ```text
 ==============================================================================
       NAKURU DAIRY CO-OPERATIVE SOCIETY  |  MONTHLY ZONE SUMMARY
@@ -95,15 +50,39 @@ Rongai       |         2,002.1 | KES       108,113.40 | Samuel Korir (803.2 L)
 ------------------------------------------------------------------------------
 TOTAL / CO-OP |         5,776.7 | KES       321,595.20 | --                    
 ==============================================================================
-
-Exported client summary table to: 'zone_monthly_summary.csv'
 ```
 
 ---
 
-## Pandas Engineering Highlights
+## Project 2: Nairobi Supermarket Chain Time Series (Day 12)
 
-- **Inner Merge (`pd.merge`)**: Combines daily collections with farmer profiles on `farmer_name`, matching transactions with corresponding rates and zones.
-- **Vectorized Payout Calculation**: Calculates `payout_kes = litres * rate_per_litre` efficiently without explicit row looping.
-- **Multi-level Aggregation (`groupby().agg()`)**: Computes zone-level totals (`total_litres`, `total_payout_kes`, active farmers count).
-- **Sub-group Ranking**: Computes individual farmer sums by `['zone', 'farmer_name']`, sorts descending, and isolates the top producer per zone.
+### Business Context
+An 18-month time series analysis evaluating 546 consecutive days of customer transaction data (January 2025 to June 2026) for a Nairobi supermarket chain. The operations manager needed to distinguish genuine structural customer growth from recurring calendar seasonality.
+
+### Executive Trend Report to the Client
+> Foot traffic demonstrates genuine underlying growth of approximately 32.3% over the 18-month period (expanding from ~2,990 to ~3,960 baseline daily transactions on a 30-day rolling average), proving that customer volume is genuinely expanding rather than merely fluctuating. While baseline foot traffic is trending steadily upward, the business experiences predictable calendar seasonality characterized by a recurring post-holiday dip in February and an explosive ~100% volume surge during the December holiday shopping peak.
+
+### Technical Pipeline
+- **Datetime Indexing**: Parses date columns into indexed timestamps for rolling statistics.
+- **30-Day Rolling Average**: Eliminates daily variance and weekend surges to reveal true trajectory.
+- **Monthly Resampling**: Computes monthly aggregate transactions and month-over-month growth.
+- **Dual-Axis Chart**: Generates `supermarket_traffic_trend.png` plotting monthly total bars alongside the 30-day rolling daily average curve.
+
+### How to Run
+```bash
+python3 supermarket_traffic_analysis.py
+```
+
+---
+
+## Technical Stack & Requirements
+
+- Python 3.8+
+- `pandas` (>= 2.0.0)
+- `numpy` (>= 1.24.0)
+- `matplotlib` (>= 3.8.0)
+
+Install dependencies:
+```bash
+pip install pandas numpy matplotlib
+```
