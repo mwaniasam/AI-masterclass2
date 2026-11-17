@@ -1,6 +1,6 @@
 # Phase II - Track B: Data Analyst - Week 3: Advanced Data Analysis
 
-A collection of commercial data engineering, aggregation, time series, and statistical analysis projects developed during Week 3 of the AI Masterclass (Track B: Data Analyst).
+A collection of commercial data engineering, aggregation, time series, statistical modeling, and multi-dataset integration projects developed during Week 3 of the AI Masterclass (Track B: Data Analyst).
 
 ---
 
@@ -8,20 +8,25 @@ A collection of commercial data engineering, aggregation, time series, and stati
 
 ```
 week_3/
-|-- daily_collection.csv                  # Day 11: Granular daily milk collection records
-|-- farmer_details.csv                    # Day 11: Farmer master profiles, zones, and rates
-|-- dairy_zone_analysis.py                # Day 11: Multi-file merge, aggregation, and reporting script
-|-- zone_monthly_summary.csv              # Day 11: Exported monthly executive summary table
-|-- day1_advanced_pandas.md               # Day 11: Detailed notes on merges, joins, and pivots
-|-- nairobi_supermarket_transactions.csv  # Day 12: 18 months of daily customer checkout counts
-|-- supermarket_traffic_analysis.py       # Day 12: Time series pipeline and visualization script
-|-- supermarket_traffic_trend.png         # Day 12: Dual-axis trend chart for operations manager
-|-- day2_time_series.md                   # Day 12: Detailed notes on rolling averages and resampling
-|-- mombasa_mfi_loans.csv                 # Day 13: 150 loan facilities across Mombasa, Kilifi, Kwale
-|-- loan_statistical_analysis.py          # Day 13: Descriptive stats, IQR outliers, and correlation script
-|-- loan_amount_distribution.png          # Day 13: Publication-grade loan distribution histogram
-|-- day3_statistical_analysis.md          # Day 13: Statistical foundations, formulas, and board brief
-\-- README.md                             # Module documentation and executive summaries
+|-- daily_collection.csv                       # Day 11: Granular daily milk collection records
+|-- farmer_details.csv                         # Day 11: Farmer master profiles, zones, and rates
+|-- dairy_zone_analysis.py                     # Day 11: Multi-file merge, aggregation, and reporting script
+|-- zone_monthly_summary.csv                   # Day 11: Exported monthly executive summary table
+|-- day1_advanced_pandas.md                    # Day 11: Detailed notes on merges, joins, and pivots
+|-- nairobi_supermarket_transactions.csv       # Day 12: 18 months of daily customer checkout counts
+|-- supermarket_traffic_analysis.py            # Day 12: Time series pipeline and visualization script
+|-- supermarket_traffic_trend.png              # Day 12: Dual-axis trend chart for operations manager
+|-- day2_time_series.md                        # Day 12: Detailed notes on rolling averages and resampling
+|-- mombasa_mfi_loans.csv                      # Day 13: 150 loan facilities across Mombasa, Kilifi, Kwale
+|-- loan_statistical_analysis.py               # Day 13: Descriptive stats, IQR outliers, and correlation script
+|-- loan_amount_distribution.png               # Day 13: Publication-grade loan distribution histogram
+|-- day3_statistical_analysis.md               # Day 13: Statistical foundations, formulas, and board brief
+|-- kisumu_school_attendance.csv               # Day 14: Daily attendance percentages with naming inconsistencies
+|-- kisumu_school_infrastructure.csv           # Day 14: Classroom capacity and water access survey data
+|-- school_infrastructure_attendance_analysis.py # Day 14: Multi-dataset deduplication, merge, and OLS regression
+|-- school_attendance_vs_classrooms.png        # Day 14: Publication-grade scatter plot with trendline
+|-- day4_multi_dataset_analysis.md             # Day 14: Entity resolution, deduplication, and officer report
+\-- README.md                                  # Module documentation and executive summaries
 ```
 
 ---
@@ -101,44 +106,75 @@ A statistical investigation of 150 loan facilities disbursed by a microfinance i
 python3 loan_statistical_analysis.py
 ```
 
+---
+
+## Project 4: Kisumu County School Infrastructure & Student Attendance Analysis (Day 14)
+
+### Business Context
+A multi-dataset investigation merging student attendance registers with infrastructure surveys across 17 public secondary schools in Kisumu County. Prepared for the County Education Officer to resolve institutional naming discrepancies, clean duplicate administrative submissions, evaluate the relationship between classroom capacity and student attendance, and examine the confounding impact of clean water access.
+
+### Education Officer One-Sentence Finding
+> "School classroom capacity exhibits a moderate positive correlation with student attendance rates (r = 0.74, p = 0.001), though reliable clean water access serves as a critical co-factor, with water-enabled schools averaging 11.6 percentage points higher daily attendance than water-deprived facilities."
+
+### Structured Findings
+1. **Classroom Capacity Correlation**: Student attendance rates positively correlate with classroom counts ($r = 0.740, p = 0.0010$). OLS regression indicates an expected attendance gain of ~0.71 percentage points per additional classroom ($y = 0.71x + 68.7, R^2 = 0.55$).
+2. **Water Access Gap**: Clean on-site water access accounts for an 11.6 percentage point attendance premium (87.2% vs. 75.6%, $t = 5.04, p = 0.0002$).
+3. **Capacity Without WASH Fails**: Kasagam Secondary has 21 classrooms but only 77.2% attendance due to lack of water, whereas Chemelil Sugar Academy achieves 89.5% attendance with only 14 classrooms with reliable water and feeding programs.
+
+### How to Run
+```bash
+python3 school_infrastructure_attendance_analysis.py
+```
+
 ### Sample Output
 ```text
-==============================================================================
-   MOMBASA MICROFINANCE INSTITUTION  |  BOARD STATISTICAL BRIEF
-==============================================================================
-Total Portfolio Loans Analyzed : 150 active facilities
-Typical Loan Size (Median)     : KES 32,750.00
-Arithmetic Average (Mean)      : KES 40,176.67
-Standard Deviation             : KES 36,149.96
-Interquartile Range (IQR)      : KES 24,625.00 to KES 42,750.00 (Spread: KES 18,125.00)
-------------------------------------------------------------------------------
-1. OUTLIER ANALYSIS (IQR METHOD)
-------------------------------------------------------------------------------
-Threshold for Unusually Large Loans : Above KES 69,937.50
-Number of Outlier Loans Detected    : 8 loans (5.3%)
-
-Identified Outlier Accounts:
-Loan ID    | Borrower County |  Loan Amount (KES) |  Days to 1st Repayment
---------------------------------------------------------------------------
-LN-1089    | Mombasa         |         290,000.00 |                     54 days
-LN-1043    | Mombasa         |         240,000.00 |                     53 days
-LN-1135    | Mombasa         |         220,000.00 |                     60 days
-LN-1016    | Kwale           |         185,000.00 |                     47 days
-LN-1114    | Kwale           |          99,500.00 |                     24 days
-LN-1126    | Mombasa         |          88,000.00 |                     34 days
-LN-1107    | Mombasa         |          77,000.00 |                     38 days
-LN-1032    | Mombasa         |          75,500.00 |                     22 days
-------------------------------------------------------------------------------
-2. CORRELATION FINDING (LOAN SIZE VS. DAYS TO FIRST REPAYMENT)
-------------------------------------------------------------------------------
-Pearson Correlation (r) : 0.570
-Statistical Significance: p = 2.5870e-14 (p < 0.001, highly significant)
-
-Board One-Sentence Plain Summary:
- "Borrowers taking larger loans take moderately longer to make their first repayment
-  (correlation = 0.57, p < 0.001), indicating that larger working capital disbursements
-  require a longer initial operational ramp-up period before cash returns begin."
-==============================================================================
+================================================================================
+   KISUMU COUNTY DEPARTMENT OF EDUCATION | MULTI-DATASET ANALYSIS BRIEF
+================================================================================
+Data Sources Merged         : Attendance Logs (File A) & Infrastructure Survey (File B)
+Duplicates Removed          : 1 duplicate row(s) identified and deduplicated
+Total Unique Institutions   : 17 educational institutions
+Valid Analysis Population   : 16 schools with complete infrastructure & attendance data
+Incomplete Records          : 1 school with missing attendance (Miwani Secondary),
+                              1 school with unrecorded water access (Kudho Secondary)
+--------------------------------------------------------------------------------
+CANONICAL MERGED SCHOOL INVENTORY TABLE:
+--------------------------------------------------------------------------------
+School Name                      | Classrooms | Water Access | Attendance %
+--------------------------------------------------------------------------------
+Ahero Girls Secondary School     |         18 |          Yes |        83.4%
+Chemelil Sugar Academy           |         14 |          Yes |        89.5%
+Dr. Aloo Gumbi Secondary School  |         11 |           No |        72.8%
+Joel Omino Secondary School      |         22 |          Yes |        84.0%
+Kasagam Secondary School         |         21 |           No |        77.2%
+Kisumu Boys High School          |         32 |          Yes |        90.8%
+Kisumu Day High School           |         27 |          Yes |        86.8%
+Koru Girls High School           |         16 |          Yes |        85.0%
+Kudho Secondary School           |         10 |   Unrecorded |        71.0%
+Lions High School                |         24 |          Yes |        91.5%
+Maseno School                    |         35 |          Yes |        94.5%
+Miwani Secondary School          |         13 |           No |      Missing
+Nyabondo High School             |         25 |          Yes |        88.5%
+Ojolla Secondary School          |         12 |           No |        74.0%
+Otieno Oyoo Secondary School     |         26 |          Yes |        79.5%
+Rae Girls Secondary School       |         15 |           No |        78.5%
+Sinyolo Girls Secondary School   |         20 |          Yes |        86.2%
+--------------------------------------------------------------------------------
+STATISTICAL FINDINGS & INFERENCE:
+--------------------------------------------------------------------------------
+Classroom Capacity Range     : 10 to 35 classrooms (Mean: 20.5)
+Attendance Rate Range        : 71.0% to 94.5% (Mean: 83.3%)
+Pearson Correlation (r)      : 0.740
+Statistical Significance (p) : p = 0.0010 (p < 0.01, highly significant)
+Water Access Attendance Gap  : Water-enabled (87.2%) vs Water-deprived (75.6%)
+                              Difference: +11.6 percentage points (t = 5.04, p = 0.0002)
+--------------------------------------------------------------------------------
+OFFICER REPORT ONE-SENTENCE FINDING:
+--------------------------------------------------------------------------------
+ "School classroom capacity exhibits a moderate positive correlation with student attendance
+  rates (r = 0.74, p = 0.001), though reliable clean water access serves as a critical co-factor,
+  with water-enabled schools averaging 11.6 percentage points higher daily attendance than water-deprived facilities."
+================================================================================
 ```
 
 ---
