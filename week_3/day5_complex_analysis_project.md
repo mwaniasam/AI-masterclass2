@@ -1,71 +1,57 @@
-# Phase II - Track B: Data Analyst - Week 3 - Day 15: Project - Complex Analysis
+# Week 3, Day 15: Complex Analysis Project
 
-Course Day: Day 15 of 40  
-Track: Track B (Data Analyst)  
-Focus: End-to-End Multi-Table Time Series, Volatility Modeling, Publication Visualization, and GitHub Release Tagging  
-Capstone Project: Nairobi Produce Market (Wakulima) — 6-Month Vegetable Price Volatility & Seasonality Study  
-
----
-
-## 1. Capstone Integration of Week 3 Skills
-
-Day 15 synthesizes every advanced analytical technique learned across Week 3 into a single reproducible portfolio project:
-
-| Week 3 Module | Skill Applied in Day 15 Capstone | Implementation Detail |
-|:---|:---|:---|
-| **Day 11: Advanced Pandas** | Multi-table relational join (`pd.merge`), pivot tables (`pivot_table`), grouped aggregations | Merged `produce_daily_prices.csv` with `vegetable_metadata.csv` and generated the 5x6 monthly price pivot matrix |
-| **Day 12: Time Series Analysis** | `DatetimeIndex`, 14-day rolling averages, monthly aggregation, chronological peak detection | Computed smoothed 14-day trendlines per crop and pinpointed exact daily peak dates |
-| **Day 13: Statistical Analysis** | Descriptive statistics, IQR outlier detection, Pearson correlation, scale-adjusted volatility | Computed Coefficient of Variation ($\text{CV}\%$), IQR spike distributions, and shelf-life correlation ($r = -0.73$) |
-| **Day 14: Multi-Dataset Hygiene** | Schema harmonization, string canonicalization, deduplication, missing-value imputation | Renamed `produce_item` -> `vegetable`, fixed 6 naming typos, removed 2 duplicates, interpolated 4 missing daily prices |
+**Track**: Data Analyst (Phase II, Week 3)  
+**Project**: Nairobi Produce Market — 6-Month Vegetable Price Volatility & Seasonality  
+**Location**: [`nairobi_produce_market/`](nairobi_produce_market/)
 
 ---
 
-## 2. Mathematical First Principles Behind the Analysis
+## 1. What This Project Combines
 
-### Why Coefficient of Variation ($\text{CV}$) Beats Raw Standard Deviation ($s$) for Volatility
-A common mistake when comparing volatility across commodities is ranking items by raw standard deviation ($s$). Standard deviation carries the same measurement unit as the variable (KES/kg), making direct comparison across different price tiers misleading:
+Day 15 pulls together the main skills practiced across Days 11 to 14 into one full workflow:
 
-- **Red Onions**: $\bar{x} = \text{KES } 137.7/\text{kg}$, $s = \text{KES } 15.3/\text{kg}$.
-- **Sukuma Wiki**: $\bar{x} = \text{KES } 43.3/\text{kg}$, $s = \text{KES } 12.0/\text{kg}$.
+- **Merging and pivots (Day 11)**: Joined daily wholesale prices (`produce_daily_prices.csv`) with crop metadata (`vegetable_metadata.csv`) and built a monthly average price matrix.
+- **Time series (Day 12)**: Indexed records by date, calculated 14-day rolling averages to smooth daily noise, and pinned down exact peak dates and peak months.
+- **Statistics (Day 13)**: Measured price volatility using Coefficient of Variation (CV%), checked IQR spike outliers, and ran a correlation between shelf life and volatility ($r = -0.73$).
+- **Data cleaning (Day 14)**: Aligned mismatched column names (`produce_item` to `vegetable`), fixed 6 casing and spelling errors, dropped 2 duplicate entries, and filled 4 missing daily prices with time-based interpolation.
 
-Looking at raw standard deviation alone would falsely suggest Red Onions are more volatile than Sukuma Wiki ($15.3 > 12.0$). However, a KES 12 swing on a KES 43 commodity represents a massive proportional shock to a buyer's budget, whereas a KES 15 swing on a KES 138 commodity is relatively mild.
+---
 
-Normalizing standard deviation by the arithmetic mean produces the dimensionless **Coefficient of Variation**:
+## 2. Key Analytical Choices
+
+### Why Use Coefficient of Variation Instead of Standard Deviation Alone
+Standard deviation is measured in KES/kg, so comparing raw values across crops at different price levels can mislead you:
+
+- **Red Onions**: Mean = KES 137.7/kg, Std Dev = KES 15.3/kg
+- **Sukuma Wiki**: Mean = KES 43.3/kg, Std Dev = KES 12.0/kg
+
+On raw standard deviation alone, Red Onions look more volatile ($15.3 > 12.0$). In practice, a KES 12 swing on a KES 43 item hits a buyer's budget far harder than a KES 15 swing on a KES 138 item. Dividing by the mean gives a scale-free measure:
 
 $$\text{CV} = \left(\frac{s}{\bar{x}}\right) \times 100\%$$
 
-Applying $\text{CV}$ reveals the true economic risk ordering:
-- **Tomatoes**: $\frac{40.5}{121.1} \times 100\% = 33.5\%$ (Highest volatility)
-- **Sukuma Wiki**: $\frac{12.0}{43.3} \times 100\% = 27.7\%$ (Second highest volatility)
-- **Irish Potatoes**: $\frac{12.3}{76.6} \times 100\% = 16.1\%$ (Moderate volatility)
-- **Red Onions**: $\frac{15.3}{137.7} \times 100\% = 11.1\%$ (Low volatility)
-- **Cabbages**: $\frac{5.1}{48.8} \times 100\% = 10.5\%$ (Most stable)
+Ranked by CV%:
+1. **Tomatoes**: 33.5% (most volatile)
+2. **Sukuma Wiki**: 27.7%
+3. **Irish Potatoes**: 16.1%
+4. **Red Onions**: 11.1%
+5. **Cabbages**: 10.5% (most stable)
 
-### Why Time-Aware Linear Interpolation Beats Mean Imputation
-When a daily price series has a missing observation on a single day (e.g. a market clerk skipped logging Tomatoes on March 19), replacing the gap with the 6-month column mean (KES 121.1) would inject an artificial vertical spike during a KES 93 March baseline!
-
-Instead, grouping by crop and running `series.interpolate(method="time")` fills the gap along the straight line connecting March 18 and March 20, preserving local temporal continuity and avoiding distortion in 14-day rolling averages.
+### Why Time Interpolation Instead of Filling With the Mean
+When a single day's price is missing (for example, Tomatoes on March 19), filling it with the 6-month average (KES 121.1/kg) would inject a fake spike into a quiet March period (~KES 93/kg). Using `interpolate(method="time")` per crop connects the day before and the day after, keeping the rolling averages honest.
 
 ---
 
-## 3. Four-Sentence Executive Findings Summary
+## 3. Summary of Findings
 
-> Tomatoes exhibit the highest wholesale price volatility in Nairobi (CV = 33.5%), peaking sharply in May 2026 at KES 220.3/kg (May 8), when heavy long rains and farm-road disruptions push monthly average prices 106% above January levels. Sukuma Wiki ranks second in volatility (CV = 27.7%), following an opposite seasonal cycle that peaks across late February and early March (KES 76.0/kg on March 1; February average KES 58.8/kg) during dry-season irrigation shortages before falling rapidly in April. Although Red Onions command the highest average price (KES 137.7/kg), their 45-day ambient shelf life allows wholesalers to buffer supply shocks, keeping relative volatility much lower (CV = 11.1%) alongside Cabbages, the most stable staple (CV = 10.5%). Across all five staples, shorter crop shelf life strongly tracks higher price risk (r = -0.73), meaning restaurants and institutional buyers should lock in supplier contracts ahead of late February for leafy greens and ahead of late April for tomatoes.
-
----
-
-## 4. Portfolio Deliverables
-
-All standalone project assets live inside [`nairobi_produce_market/`](file:///home/mwaniasamuel/AI-masterclass2/week_3/nairobi_produce_market):
-- Data tables: [`produce_daily_prices.csv`](file:///home/mwaniasamuel/AI-masterclass2/week_3/nairobi_produce_market/data/produce_daily_prices.csv) and [`vegetable_metadata.csv`](file:///home/mwaniasamuel/AI-masterclass2/week_3/nairobi_produce_market/data/vegetable_metadata.csv)
-- Pipeline script: [`produce_market_analysis.py`](file:///home/mwaniasamuel/AI-masterclass2/week_3/nairobi_produce_market/produce_market_analysis.py)
-- Chart 1 (Trends & Peaks): [`vegetable_price_trends.png`](file:///home/mwaniasamuel/AI-masterclass2/week_3/nairobi_produce_market/charts/vegetable_price_trends.png)
-- Chart 2 (Volatility & Shelf Life): [`volatility_comparison.png`](file:///home/mwaniasamuel/AI-masterclass2/week_3/nairobi_produce_market/charts/volatility_comparison.png)
-- Chart 3 (Seasonal Heatmap & Boxplots): [`monthly_seasonality.png`](file:///home/mwaniasamuel/AI-masterclass2/week_3/nairobi_produce_market/charts/monthly_seasonality.png)
-- Client Report: [`nairobi_produce_market/README.md`](file:///home/mwaniasamuel/AI-masterclass2/week_3/nairobi_produce_market/README.md)
+Tomatoes exhibit the highest wholesale price volatility in Nairobi (CV = 33.5%), peaking sharply in May 2026 at KES 220.3/kg (May 8), when heavy long rains and farm-road disruptions push monthly average prices 106% above January levels. Sukuma Wiki ranks second in volatility (CV = 27.7%), following an opposite seasonal cycle that peaks across late February and early March (KES 76.0/kg on March 1; February average KES 58.8/kg) during dry-season irrigation shortages before falling rapidly in April. Although Red Onions command the highest average price (KES 137.7/kg), their 45-day ambient shelf life allows wholesalers to buffer supply shocks, keeping relative volatility much lower (CV = 11.1%) alongside Cabbages, the most stable staple (CV = 10.5%). Across all five staples, shorter crop shelf life strongly tracks higher price risk (r = -0.73), meaning restaurants and institutional buyers should lock in supplier contracts ahead of late February for leafy greens and ahead of late April for tomatoes.
 
 ---
 
-## 5. Git Release Tagging Note
+## 4. Files Produced
 
-Because this monorepo (`AI-masterclass2`) already contains an earlier `v1.0` tag pointing to the Week 2 Day 10 milestone (`2e8048b`), Week 3 Day 15 is tagged cleanly as **`week3-v1.0`** rather than overwriting shared remote tag history. This preserves immutable release auditability across all weeks of the program.
+- Data: [`produce_daily_prices.csv`](nairobi_produce_market/data/produce_daily_prices.csv), [`vegetable_metadata.csv`](nairobi_produce_market/data/vegetable_metadata.csv)
+- Script: [`produce_market_analysis.py`](nairobi_produce_market/produce_market_analysis.py)
+- Charts: [`vegetable_price_trends.png`](nairobi_produce_market/charts/vegetable_price_trends.png), [`volatility_comparison.png`](nairobi_produce_market/charts/volatility_comparison.png), [`monthly_seasonality.png`](nairobi_produce_market/charts/monthly_seasonality.png)
+- Project README: [`nairobi_produce_market/README.md`](nairobi_produce_market/README.md)
+
+*Release tag note*: Since `v1.0` was already used on Week 2 Day 10, this Week 3 project is tagged as `week3-v1.0`.
