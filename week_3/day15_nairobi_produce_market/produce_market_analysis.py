@@ -20,6 +20,7 @@ from scipy import stats
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 CHARTS_DIR = os.path.join(BASE_DIR, "charts")
+os.makedirs(CHARTS_DIR, exist_ok=True)
 
 PRICES_CSV = os.path.join(DATA_DIR, "produce_daily_prices.csv")
 METADATA_CSV = os.path.join(DATA_DIR, "vegetable_metadata.csv")

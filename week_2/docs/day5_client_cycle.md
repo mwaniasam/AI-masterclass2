@@ -61,10 +61,10 @@ Where is the computer located that farmers will use to check their totals?
 
 ## Stage 4: Built Deliverables & Automated Testing
 
-The deliverable was built in [`week_2/dairy_calculator/`](file:///home/mwaniasamuel/AI-masterclass2/week_2/dairy_calculator/):
-- [`dairy_calculator.py`](file:///home/mwaniasamuel/AI-masterclass2/week_2/dairy_calculator/dairy_calculator.py): Core calculation engine and command-line interface.
-- [`price.txt`](file:///home/mwaniasamuel/AI-masterclass2/week_2/dairy_calculator/price.txt): Decoupled configuration file containing the active rate (`55.0`).
-- [`README.md`](file:///home/mwaniasamuel/AI-masterclass2/week_2/dairy_calculator/README.md): Client documentation.
+The deliverable was built in [`week_2/dairy_calculator/`](../dairy_calculator/):
+- [`dairy_calculator.py`](../dairy_calculator/dairy_calculator.py): Core calculation engine and command-line interface.
+- [`price.txt`](../dairy_calculator/price.txt): Decoupled configuration file containing the active rate (`55.0`).
+- [`README.md`](../dairy_calculator/README.md): Client documentation.
 
 ### Test Results Matrix
 

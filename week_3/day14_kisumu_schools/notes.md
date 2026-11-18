@@ -177,7 +177,7 @@ Large classroom footprints do not ensure high attendance in the absence of basic
 
 ## 6. Visual Artifact
 
-The high-resolution visual artifact is saved at [`school_attendance_vs_classrooms.png`](file:///home/mwaniasamuel/AI-masterclass2/week_3/school_attendance_vs_classrooms.png):
+The chart is saved at [`charts/school_attendance_vs_classrooms.png`](charts/school_attendance_vs_classrooms.png):
 
 - **Blue Data Points**: Schools equipped with on-site clean water access ($n = 11$, Mean Attendance: 87.2%).
 - **Red Data Points**: Schools lacking reliable clean water access ($n = 4$, Mean Attendance: 75.6%).

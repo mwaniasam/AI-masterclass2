@@ -12,8 +12,11 @@ import numpy as np
 import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_FILE = BASE_DIR / "nairobi_supermarket_transactions.csv"
-CHART_FILE = BASE_DIR / "supermarket_traffic_trend.png"
+DATA_DIR = BASE_DIR / "data"
+CHARTS_DIR = BASE_DIR / "charts"
+CHARTS_DIR.mkdir(parents=True, exist_ok=True)
+DATA_FILE = DATA_DIR / "nairobi_supermarket_transactions.csv"
+CHART_FILE = CHARTS_DIR / "supermarket_traffic_trend.png"
 
 
 def load_and_prepare_data(file_path=DATA_FILE):

@@ -1,4 +1,14 @@
-/week-1/requests
+# Local secrets and environment files
 .env
+
+# Python artifacts and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Cached API outputs and local scratch files
 *.json
 field_manual.md
+/week-1/requests
+/week_1/requests

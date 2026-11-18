@@ -165,7 +165,7 @@ The following 8 accounts exceed the KES 69,937.50 upper limit and represent comm
 
 ## 6. Visual Artifact
 
-The publication-grade distribution visualization is saved at [`loan_amount_distribution.png`](file:///home/mwaniasamuel/AI-masterclass2/week_3/loan_amount_distribution.png):
+The chart is saved at [`charts/loan_amount_distribution.png`](charts/loan_amount_distribution.png):
 
 - **Teal Bars**: Core distribution of standard micro-loans within regular bounds.
 - **Red Bars**: Outlier loan facilities extending past KES 69,937.50.

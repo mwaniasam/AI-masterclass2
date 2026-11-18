@@ -82,7 +82,7 @@ The operations manager of a Nairobi supermarket chain wanted to understand wheth
 
 ## 5. Visual Artifact
 
-The high-resolution visualization is saved in the repository at [`supermarket_traffic_trend.png`](file:///home/mwaniasamuel/AI-masterclass2/week_3/supermarket_traffic_trend.png):
+The chart is saved at [`charts/supermarket_traffic_trend.png`](charts/supermarket_traffic_trend.png):
 
 - **Blue Bars (Left Axis)**: Total monthly customer transactions in thousands.
 - **Red Line (Right Axis)**: 30-day rolling daily average, highlighting the smooth upward trajectory and seasonal peaks.

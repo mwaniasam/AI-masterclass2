@@ -15,8 +15,12 @@ import pandas as pd
 from scipy import stats
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_FILE = BASE_DIR / "mombasa_mfi_loans.csv"
-CHART_FILE = BASE_DIR / "loan_amount_distribution.png"
+DATA_DIR = BASE_DIR / "data"
+CHARTS_DIR = BASE_DIR / "charts"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+CHARTS_DIR.mkdir(parents=True, exist_ok=True)
+DATA_FILE = DATA_DIR / "mombasa_mfi_loans.csv"
+CHART_FILE = CHARTS_DIR / "loan_amount_distribution.png"
 
 
 def generate_or_load_data(file_path=DATA_FILE, n=150, seed=42) -> pd.DataFrame:

@@ -2,7 +2,7 @@
 
 **Track**: Data Analyst (Phase II, Week 3)  
 **Project**: Nairobi Produce Market — 6-Month Vegetable Price Volatility & Seasonality  
-**Location**: [`nairobi_produce_market/`](nairobi_produce_market/)
+**Report**: [`README.md`](README.md)
 
 ---
 
@@ -10,7 +10,7 @@
 
 Day 15 pulls together the main skills practiced across Days 11 to 14 into one full workflow:
 
-- **Merging and pivots (Day 11)**: Joined daily wholesale prices (`produce_daily_prices.csv`) with crop metadata (`vegetable_metadata.csv`) and built a monthly average price matrix.
+- **Merging and pivots (Day 11)**: Joined daily wholesale prices (`data/produce_daily_prices.csv`) with crop metadata (`data/vegetable_metadata.csv`) and built a monthly average price matrix.
 - **Time series (Day 12)**: Indexed records by date, calculated 14-day rolling averages to smooth daily noise, and pinned down exact peak dates and peak months.
 - **Statistics (Day 13)**: Measured price volatility using Coefficient of Variation (CV%), checked IQR spike outliers, and ran a correlation between shelf life and volatility ($r = -0.73$).
 - **Data cleaning (Day 14)**: Aligned mismatched column names (`produce_item` to `vegetable`), fixed 6 casing and spelling errors, dropped 2 duplicate entries, and filled 4 missing daily prices with time-based interpolation.
@@ -49,9 +49,9 @@ Tomatoes exhibit the highest wholesale price volatility in Nairobi (CV = 33.5%),
 
 ## 4. Files Produced
 
-- Data: [`produce_daily_prices.csv`](nairobi_produce_market/data/produce_daily_prices.csv), [`vegetable_metadata.csv`](nairobi_produce_market/data/vegetable_metadata.csv)
-- Script: [`produce_market_analysis.py`](nairobi_produce_market/produce_market_analysis.py)
-- Charts: [`vegetable_price_trends.png`](nairobi_produce_market/charts/vegetable_price_trends.png), [`volatility_comparison.png`](nairobi_produce_market/charts/volatility_comparison.png), [`monthly_seasonality.png`](nairobi_produce_market/charts/monthly_seasonality.png)
-- Project README: [`nairobi_produce_market/README.md`](nairobi_produce_market/README.md)
+- Data: [`data/produce_daily_prices.csv`](data/produce_daily_prices.csv), [`data/vegetable_metadata.csv`](data/vegetable_metadata.csv)
+- Script: [`produce_market_analysis.py`](produce_market_analysis.py)
+- Charts: [`charts/vegetable_price_trends.png`](charts/vegetable_price_trends.png), [`charts/volatility_comparison.png`](charts/volatility_comparison.png), [`charts/monthly_seasonality.png`](charts/monthly_seasonality.png)
+- Project README: [`README.md`](README.md)
 
 *Release tag note*: Since `v1.0` was already used on Week 2 Day 10, this Week 3 project is tagged as `week3-v1.0`.

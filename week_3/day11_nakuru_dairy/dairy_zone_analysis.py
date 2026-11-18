@@ -9,9 +9,10 @@ from pathlib import Path
 import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parent
-COLLECTION_FILE = BASE_DIR / "daily_collection.csv"
-FARMERS_FILE = BASE_DIR / "farmer_details.csv"
-OUTPUT_SUMMARY_FILE = BASE_DIR / "zone_monthly_summary.csv"
+DATA_DIR = BASE_DIR / "data"
+COLLECTION_FILE = DATA_DIR / "daily_collection.csv"
+FARMERS_FILE = DATA_DIR / "farmer_details.csv"
+OUTPUT_SUMMARY_FILE = DATA_DIR / "zone_monthly_summary.csv"
 
 
 def load_data(collection_path=COLLECTION_FILE, farmers_path=FARMERS_FILE):

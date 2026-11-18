@@ -17,9 +17,12 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-ATTENDANCE_CSV = os.path.join(SCRIPT_DIR, "kisumu_school_attendance.csv")
-INFRASTRUCTURE_CSV = os.path.join(SCRIPT_DIR, "kisumu_school_infrastructure.csv")
-OUTPUT_CHART = os.path.join(SCRIPT_DIR, "school_attendance_vs_classrooms.png")
+DATA_DIR = os.path.join(SCRIPT_DIR, "data")
+CHARTS_DIR = os.path.join(SCRIPT_DIR, "charts")
+os.makedirs(CHARTS_DIR, exist_ok=True)
+ATTENDANCE_CSV = os.path.join(DATA_DIR, "kisumu_school_attendance.csv")
+INFRASTRUCTURE_CSV = os.path.join(DATA_DIR, "kisumu_school_infrastructure.csv")
+OUTPUT_CHART = os.path.join(CHARTS_DIR, "school_attendance_vs_classrooms.png")
 
 
 def load_raw_data():
