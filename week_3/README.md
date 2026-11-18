@@ -26,6 +26,12 @@ week_3/
 |-- school_infrastructure_attendance_analysis.py # Day 14: Multi-dataset deduplication, merge, and OLS regression
 |-- school_attendance_vs_classrooms.png        # Day 14: Publication-grade scatter plot with trendline
 |-- day4_multi_dataset_analysis.md             # Day 14: Entity resolution, deduplication, and officer report
+|-- nairobi_produce_market/                    # Day 15: End-to-end complex analysis capstone project
+|   |-- data/                                  # Daily produce prices (6 months) & crop metadata tables
+|   |-- charts/                                # 3 publication-grade charts (trends, volatility, heatmap)
+|   |-- produce_market_analysis.py             # Complete cleaning, merging, CV volatility & charting pipeline
+|   \-- README.md                              # Standalone client-facing executive report
+|-- day5_complex_analysis_project.md           # Day 15: Technical architecture and mathematical rationale
 \-- README.md                                  # Module documentation and executive summaries
 ```
 
@@ -175,6 +181,32 @@ OFFICER REPORT ONE-SENTENCE FINDING:
   rates (r = 0.74, p = 0.001), though reliable clean water access serves as a critical co-factor,
   with water-enabled schools averaging 11.6 percentage points higher daily attendance than water-deprived facilities."
 ================================================================================
+```
+
+---
+
+## Project 5: Nairobi Produce Market Complex Analysis Capstone (Day 15)
+
+### Business Context
+An end-to-end multi-table time-series and volatility study of daily wholesale vegetable prices at Nairobi's Wakulima Market over 6 months (January 1 to June 30, 2026). Combines 907 raw daily price logs with crop shelf-life and origin metadata to answer: *which vegetable has the highest price volatility and when does it peak?*
+
+### Four-Sentence Executive Findings Summary
+> Tomatoes exhibit the highest wholesale price volatility in Nairobi (CV = 33.5%), peaking sharply in May 2026 at KES 220.3/kg (May 8), when heavy long rains and farm-road disruptions push monthly average prices 106% above January levels. Sukuma Wiki ranks second in volatility (CV = 27.7%), following an opposite seasonal cycle that peaks across late February and early March (KES 76.0/kg on March 1; February average KES 58.8/kg) during dry-season irrigation shortages before falling rapidly in April. Although Red Onions command the highest average price (KES 137.7/kg), their 45-day ambient shelf life allows wholesalers to buffer supply shocks, keeping relative volatility much lower (CV = 11.1%) alongside Cabbages, the most stable staple (CV = 10.5%). Across all five staples, shorter crop shelf life strongly tracks higher price risk (r = -0.73), meaning restaurants and institutional buyers should lock in supplier contracts ahead of late February for leafy greens and ahead of late April for tomatoes.
+
+### Volatility Ranking Summary
+| Vegetable | Mean (KES/kg) | Std Dev | Volatility (CV %) | Peak Price | Peak Date | Peak Month | Shelf Life |
+|:---|---:|---:|---:|---:|:---:|:---:|:---:|
+| **Tomatoes** | 121.1 | 40.5 | **33.5%** | KES 220.3 | 2026-05-08 | May 2026 | 5 days |
+| **Sukuma Wiki** | 43.3 | 12.0 | **27.7%** | KES 76.0 | 2026-03-01 | Feb 2026 | 2 days |
+| **Irish Potatoes** | 76.6 | 12.3 | **16.1%** | KES 103.6 | 2026-04-22 | Apr 2026 | 30 days |
+| **Red Onions** | 137.7 | 15.3 | **11.1%** | KES 175.8 | 2026-03-09 | Mar 2026 | 45 days |
+| **Cabbages** | 48.8 | 5.1 | **10.5%** | KES 59.0 | 2026-03-13 | Mar 2026 | 14 days |
+
+Full standalone report and embedded charts: [`nairobi_produce_market/README.md`](nairobi_produce_market/README.md)
+
+### How to Run
+```bash
+python3 nairobi_produce_market/produce_market_analysis.py
 ```
 
 ---
